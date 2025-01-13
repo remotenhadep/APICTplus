@@ -492,9 +492,11 @@ class Middleware
             ])),
 
             'api' => array_values(array_filter([
+                'throttle:api',
                 $this->statefulApi ? \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class : null,
                 $this->apiLimiter ? 'throttle:'.$this->apiLimiter : null,
                 \Illuminate\Routing\Middleware\SubstituteBindings::class,
+                \Tymon\JWTAuth\Http\Middleware\Authenticate::class,
             ])),
         ];
 
