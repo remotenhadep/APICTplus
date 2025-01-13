@@ -5,7 +5,7 @@
         "version": "1.0.0"
     },
     "paths": {
-        "/TelevisionAPI/api/login": {
+        "/canthoplus/api/login": {
             "post": {
                 "tags": [
                     "Đăng nhập và lấy token"
@@ -65,7 +65,7 @@
                 }
             }
         },
-        "/api/logout": {
+        "/TelevisionAPI/api/logout": {
             "post": {
                 "tags": [
                     "Logout"
