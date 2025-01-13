@@ -11,7 +11,7 @@ class AuthController extends Controller
 {
     /**
      * @OA\Post(
-     *     path="/TelevisionAPI/api/login",
+     *     path="/api/login",
      *     operationId="login",
      *     tags={"Đăng nhập và lấy token"},
      *     summary="User login",
