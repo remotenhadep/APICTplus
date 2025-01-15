@@ -220,19 +220,6 @@ return [
                 [
                     'BearerAuth' => []
                 ],
-                /*
-                 * Examples of Securities
-                 */
-                [
-                    /*
-                    'oauth2_security_example' => [
-                        'read',
-                        'write'
-                    ],
-
-                    'passport' => []
-                    */
-                ],
             ],
             'BearerAuth' => [
                 'type' => 'apiKey',

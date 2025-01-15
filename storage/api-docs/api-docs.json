@@ -2,17 +2,17 @@
     "openapi": "3.0.0",
     "info": {
         "title": "LÝ GIA THẠNH",
-        "version": "1.0.0"
+        "version": "0.1"
     },
     "paths": {
-        "/canthoplus/api/login": {
+        "/api/register": {
             "post": {
                 "tags": [
-                    "Đăng nhập và lấy token"
+                    "Authentication"
                 ],
-                "summary": "User login",
-                "description": "Người dùng đăng nhập và JWT token được khởi tạo",
-                "operationId": "login",
+                "summary": "User Register",
+                "description": "User register and JWT token generation",
+                "operationId": "register",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -20,12 +20,93 @@
                             "schema": {
                                 "required": [
                                     "phone",
+                                    "password",
+                                    "name"
+                                ],
+                                "properties": {
+                                    "phone": {
+                                        "type": "string",
+                                        "format": "text"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password"
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "format": "text"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful register with JWT token",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "code": {
+                                            "type": "string"
+                                        },
+                                        "error": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "account": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "name": {
+                                                                    "type": "string"
+                                                                },
+                                                                "token": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/canthoplus/api/login": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "User login",
+                "description": "User login and JWT token generation",
+                "operationId": "login",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
                                     "password"
                                 ],
                                 "properties": {
                                     "phone": {
                                         "type": "string",
-                                        "format": "phone"
+                                        "format": "text"
                                     },
                                     "password": {
                                         "type": "string",
@@ -39,19 +120,38 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Successful login with JWT token",
+                        "description": "Successful register with JWT token",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "access_token": {
+                                        "code": {
                                             "type": "string"
                                         },
-                                        "token_type": {
+                                        "error": {
                                             "type": "string"
                                         },
-                                        "expires_in": {
-                                            "type": "integer"
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "account": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "name": {
+                                                                    "type": "string"
+                                                                },
+                                                                "token": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
                                         }
                                     },
                                     "type": "object"
@@ -65,97 +165,73 @@
                 }
             }
         },
-        "/TelevisionAPI/api/logout": {
-            "post": {
-                "tags": [
-                    "Logout"
-                ],
-                "summary": "User logout",
-                "description": "User logout and JWT token generation",
-                "operationId": "logout",
-                "requestBody": {
-                    "required": false
-                },
-                "responses": {
-                    "200": {
-                        "description": "Successful logout"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/users": {
+        "/canthoplus/api/live/tv": {
             "get": {
                 "tags": [
-                    "Users"
+                    "Others"
                 ],
-                "summary": "Get list of users",
-                "description": "Returns list of users",
-                "operationId": "getUsers",
+                "summary": "TV Broadcast Schedule",
+                "description": "TV Broadcast Schedule",
+                "operationId": "LiveTV",
+                "parameters": [
+                    {
+                        "name": "date",
+                        "in": "query",
+                        "description": "Day",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "Successful operation",
+                        "description": "Successful",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/components/schemas/User"
-                                    }
+                                    "properties": {
+                                        "code": {
+                                            "type": "string"
+                                        },
+                                        "error": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "live_url": {
+                                                        "type": "string"
+                                                    },
+                                                    "playback_url": {
+                                                        "type": "string"
+                                                    },
+                                                    "list": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
                     },
                     "401": {
                         "description": "Unauthorized"
-                    },
-                    "404": {
-                        "description": "Resource Not Found"
                     }
                 },
                 "security": [
                     {
-                        "bearerAuth": []
+                        "BearerAuth": []
                     }
                 ]
             }
         }
     },
     "components": {
-        "schemas": {
-            "User": {
-                "title": "User model",
-                "description": "User model",
-                "properties": {
-                    "id": {
-                        "title": "ID",
-                        "description": "ID",
-                        "type": "integer",
-                        "format": "int64",
-                        "example": 1
-                    },
-                    "givenName": {
-                        "title": "givenName",
-                        "description": "User's given name",
-                        "type": "string",
-                        "example": "John"
-                    }
-                },
-                "type": "object",
-                "xml": {
-                    "name": "User"
-                }
-            }
-        },
         "securitySchemes": {
-            "bearerAuth": {
+            "BearerAuth": {
                 "type": "http",
                 "bearerFormat": "JWT",
                 "scheme": "bearer"
@@ -164,16 +240,12 @@
     },
     "tags": [
         {
-            "name": "Đăng nhập và lấy token",
-            "description": "Đăng nhập và lấy token"
+            "name": "Authentication",
+            "description": "Authentication"
         },
         {
-            "name": "Logout",
-            "description": "Logout"
-        },
-        {
-            "name": "Users",
-            "description": "Users"
+            "name": "Others",
+            "description": "Others"
         }
     ],
     "security": [

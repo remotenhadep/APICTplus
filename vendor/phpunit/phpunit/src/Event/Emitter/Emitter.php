@@ -88,11 +88,6 @@ interface Emitter
     /**
      * @param class-string $testClassName
      */
-    public function testBeforeTestMethodErrored(string $testClassName, ClassMethod $calledMethod, Throwable $throwable): void;
-
-    /**
-     * @psalm-param class-string $testClassName
-     */
     public function testBeforeTestMethodFinished(string $testClassName, ClassMethod ...$calledMethods): void;
 
     /**
@@ -102,11 +97,6 @@ interface Emitter
 
     /**
      * @param class-string $testClassName
-     */
-    public function testPreConditionErrored(string $testClassName, ClassMethod $calledMethod, Throwable $throwable): void;
-
-    /**
-     * @psalm-param class-string $testClassName
      */
     public function testPreConditionFinished(string $testClassName, ClassMethod ...$calledMethods): void;
 
@@ -264,11 +254,6 @@ interface Emitter
     /**
      * @param class-string $testClassName
      */
-    public function testPostConditionErrored(string $testClassName, ClassMethod $calledMethod, Throwable $throwable): void;
-
-    /**
-     * @psalm-param class-string $testClassName
-     */
     public function testPostConditionFinished(string $testClassName, ClassMethod ...$calledMethods): void;
 
     /**
@@ -279,11 +264,6 @@ interface Emitter
     /**
      * @param class-string $testClassName
      */
-    public function testAfterTestMethodErrored(string $testClassName, ClassMethod $calledMethod, Throwable $throwable): void;
-
-    /**
-     * @psalm-param class-string $testClassName
-     */
     public function testAfterTestMethodFinished(string $testClassName, ClassMethod ...$calledMethods): void;
 
     /**
@@ -293,11 +273,6 @@ interface Emitter
 
     /**
      * @param class-string $testClassName
-     */
-    public function testAfterLastTestMethodErrored(string $testClassName, ClassMethod $calledMethod, Throwable $throwable): void;
-
-    /**
-     * @psalm-param class-string $testClassName
      */
     public function testAfterLastTestMethodFinished(string $testClassName, ClassMethod ...$calledMethods): void;
 

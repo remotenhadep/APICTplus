@@ -119,7 +119,7 @@ class JWTGuard implements Guard
     public function attempt(array $credentials = [], $login = true)
     {
         $this->lastAttempted = $user = $this->provider->retrieveByCredentials($credentials);
-
+// print_r($user); exit;
         if ($this->hasValidCredentials($user, $credentials)) {
             return $login ? $this->login($user) : true;
         }

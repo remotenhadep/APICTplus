@@ -33,7 +33,7 @@ final readonly class CoversMethod
      * @param class-string     $className
      * @param non-empty-string $methodName
      */
-    public function __construct(string $className, string $methodName)
+    public function __construct(string $className, $methodName)
     {
         $this->className  = $className;
         $this->methodName = $methodName;

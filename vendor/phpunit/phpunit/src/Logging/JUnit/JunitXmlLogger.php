@@ -31,7 +31,6 @@ use PHPUnit\Event\Test\Finished;
 use PHPUnit\Event\Test\MarkedIncomplete;
 use PHPUnit\Event\Test\PreparationStarted;
 use PHPUnit\Event\Test\Prepared;
-use PHPUnit\Event\Test\PrintedUnexpectedOutput;
 use PHPUnit\Event\Test\Skipped;
 use PHPUnit\Event\TestSuite\Started;
 use PHPUnit\Event\UnknownSubscriberTypeException;
@@ -195,18 +194,6 @@ final class JunitXmlLogger
         $this->prepared = true;
     }
 
-    public function testPrintedUnexpectedOutput(PrintedUnexpectedOutput $event): void
-    {
-        assert($this->currentTestCase !== null);
-
-        $systemOut = $this->document->createElement(
-            'system-out',
-            Xml::prepareString($event->output()),
-        );
-
-        $this->currentTestCase->appendChild($systemOut);
-    }
-
     /**
      * @throws InvalidArgumentException
      */
@@ -301,7 +288,6 @@ final class JunitXmlLogger
             new TestPreparationStartedSubscriber($this),
             new TestPreparationFailedSubscriber($this),
             new TestPreparedSubscriber($this),
-            new TestPrintedUnexpectedOutputSubscriber($this),
             new TestFinishedSubscriber($this),
             new TestErroredSubscriber($this),
             new TestFailedSubscriber($this),
