@@ -18,4 +18,7 @@ Route::group([
 
     // television and radio
     Route::get("live/tv", [ApiController::class, "livetv"]);
+    Route::post("live/tv/create", [ApiController::class, "createlivetv"]);
+    Route::post("live/tv/update", [ApiController::class, "updatelivetv"]);
+    Route::delete("live/tv/delete", [ApiController::class, "deletelivetv"]);
 });

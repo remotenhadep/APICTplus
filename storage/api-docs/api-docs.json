@@ -170,69 +170,6 @@
                 }
             }
         },
-        "/api/live/tv": {
-            "get": {
-                "tags": [
-                    "Others"
-                ],
-                "summary": "TV Broadcast Schedule",
-                "description": "TV Broadcast Schedule",
-                "operationId": "LiveTV",
-                "parameters": [
-                    {
-                        "name": "date",
-                        "in": "query",
-                        "description": "Day",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "code": {
-                                            "type": "string"
-                                        },
-                                        "error": {
-                                            "type": "string"
-                                        },
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "live_url": {
-                                                        "type": "string"
-                                                    },
-                                                    "playback_url": {
-                                                        "type": "string"
-                                                    },
-                                                    "list": {
-                                                        "type": "string"
-                                                    }
-                                                },
-                                                "type": "object"
-                                            }
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    }
-                },
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ]
-            }
-        },
         "/api/users/list": {
             "get": {
                 "tags": [
@@ -408,6 +345,10 @@
                                     "phone"
                                 ],
                                 "properties": {
+                                    "id": {
+                                        "type": "string",
+                                        "format": "text"
+                                    },
                                     "name": {
                                         "type": "string",
                                         "format": "text"
@@ -415,10 +356,6 @@
                                     "password": {
                                         "type": "string",
                                         "format": "password"
-                                    },
-                                    "id": {
-                                        "type": "string",
-                                        "format": "text"
                                     },
                                     "phone": {
                                         "type": "string",
@@ -544,6 +481,345 @@
                     }
                 }
             }
+        },
+        "/api/live/tv": {
+            "get": {
+                "tags": [
+                    "Others"
+                ],
+                "summary": "TV Broadcast Schedule",
+                "description": "TV Broadcast Schedule",
+                "operationId": "LiveTV",
+                "parameters": [
+                    {
+                        "name": "date",
+                        "in": "query",
+                        "description": "Day",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "code": {
+                                            "type": "string"
+                                        },
+                                        "error": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "live_url": {
+                                                        "type": "string"
+                                                    },
+                                                    "playback_url": {
+                                                        "type": "string"
+                                                    },
+                                                    "list": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/live/tv/create": {
+            "post": {
+                "tags": [
+                    "Others"
+                ],
+                "summary": "Create Live TV (api mới, cần check lại nghiệp vụ)",
+                "description": "Create Live TV",
+                "operationId": "createLiveTV",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "ngay",
+                                    "time",
+                                    "title",
+                                    "youtubeid",
+                                    "url_mp4",
+                                    "duration"
+                                ],
+                                "properties": {
+                                    "ngay": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "17/01/2025"
+                                    },
+                                    "time": {
+                                        "type": "string",
+                                        "format": "text",
+                                        "example": "15:00"
+                                    },
+                                    "title": {
+                                        "type": "string",
+                                        "format": "text"
+                                    },
+                                    "youtubeid": {
+                                        "type": "string",
+                                        "format": "text"
+                                    },
+                                    "timecode": {
+                                        "type": "string",
+                                        "format": "text",
+                                        "example": "17/01/2025 15:00:24"
+                                    },
+                                    "url_mp4": {
+                                        "type": "string",
+                                        "format": "text"
+                                    },
+                                    "duration": {
+                                        "type": "string",
+                                        "format": "text"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful disabled with JWT token",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "string"
+                                                    },
+                                                    "time": {
+                                                        "type": "string"
+                                                    },
+                                                    "title": {
+                                                        "type": "string"
+                                                    },
+                                                    "playliststart": {
+                                                        "type": "string"
+                                                    },
+                                                    "duration": {
+                                                        "type": "string"
+                                                    },
+                                                    "milisecon": {
+                                                        "type": "string"
+                                                    },
+                                                    "timecode": {
+                                                        "type": "string"
+                                                    },
+                                                    "youtubeid": {
+                                                        "type": "string"
+                                                    },
+                                                    "url_mp4": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/live/tv/update": {
+            "post": {
+                "tags": [
+                    "Others"
+                ],
+                "summary": "Update Live TV (api mới, cần check lại nghiệp vụ)",
+                "description": "Update Live TV",
+                "operationId": "updateLiveTV",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "id",
+                                    "ngay",
+                                    "time",
+                                    "title",
+                                    "youtubeid",
+                                    "url_mp4",
+                                    "duration"
+                                ],
+                                "properties": {
+                                    "id": {
+                                        "type": "string",
+                                        "format": "text"
+                                    },
+                                    "ngay": {
+                                        "type": "string",
+                                        "format": "text",
+                                        "example": "17/01/2025"
+                                    },
+                                    "time": {
+                                        "type": "string",
+                                        "format": "text"
+                                    },
+                                    "title": {
+                                        "type": "string",
+                                        "format": "text"
+                                    },
+                                    "youtubeid": {
+                                        "type": "string",
+                                        "format": "text"
+                                    },
+                                    "url_mp4": {
+                                        "type": "string",
+                                        "format": "text"
+                                    },
+                                    "timecode": {
+                                        "type": "string",
+                                        "format": "text",
+                                        "example": "17/01/2025 15:00:24"
+                                    },
+                                    "duration": {
+                                        "type": "string",
+                                        "format": "text"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful disabled with JWT token",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "string"
+                                                    },
+                                                    "time": {
+                                                        "type": "string"
+                                                    },
+                                                    "title": {
+                                                        "type": "string"
+                                                    },
+                                                    "playliststart": {
+                                                        "type": "string"
+                                                    },
+                                                    "duration": {
+                                                        "type": "string"
+                                                    },
+                                                    "milisecon": {
+                                                        "type": "string"
+                                                    },
+                                                    "timecode": {
+                                                        "type": "string"
+                                                    },
+                                                    "youtubeid": {
+                                                        "type": "string"
+                                                    },
+                                                    "url_mp4": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/live/tv/delete": {
+            "delete": {
+                "tags": [
+                    "Others"
+                ],
+                "summary": "Delete Live TV (api mới, cần check lại nghiệp vụ)",
+                "description": "Delete Live TV",
+                "operationId": "deleteLiveTV",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": "id",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "code": {
+                                            "type": "string"
+                                        },
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
         }
     },
     "components": {
@@ -561,12 +837,12 @@
             "description": "Authentication"
         },
         {
-            "name": "Others",
-            "description": "Others"
-        },
-        {
             "name": "Users",
             "description": "Users"
+        },
+        {
+            "name": "Others",
+            "description": "Others"
         }
     ],
     "security": [
