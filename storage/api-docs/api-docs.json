@@ -5,7 +5,7 @@
         "version": "0.1"
     },
     "paths": {
-        "/api/register": {
+        "/canthoplus/api/register": {
             "post": {
                 "tags": [
                     "Authentication"
@@ -165,7 +165,7 @@
                 }
             }
         },
-        "/canthoplus/api/live/tv": {
+        "/api/live/tv": {
             "get": {
                 "tags": [
                     "Others"

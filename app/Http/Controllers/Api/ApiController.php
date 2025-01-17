@@ -10,9 +10,14 @@ use App\Models\Account;
 use Illuminate\Support\Facades\Crypt;
 use App\Models\Config;
 use App\Models\Lichphatsong;
+use Auth;
+use Validator;
 
 class ApiController extends Controller
 {    
+    public function __construct() {
+        $this->middleware('auth:api', ['except' => ['login', 'register']]);
+    }
     /**
      * @OA\Post(
      *     path="/api/register",
@@ -46,51 +51,31 @@ class ApiController extends Controller
      *     )
      * )
      */
-    public function register(Request $req){
-        $phone = $req->input('phone');
-        $pass = $req->input('password');
-        $name = $req->input('name');
-        if ($name == null) {
-            $name = "";
+    public function register(Request $request){
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|between:2,100',
+            'phone' => 'required|string|max:100|unique:users',
+            'password' => 'required|string',
+        ]);
+
+        if($validator->fails()){
+            return response()->json($validator->errors()->toJson(), 400);
         }
-        if ($phone == null || $pass == null) {
-            return [
-                'code' => "401",
-                'error'=>"Null parameter",
-                'data'=>[
-                    'list'=>[]
-                ]
-            ];
-        }
-        $accexits = Account::where('email',$phone)->first();
-        if ($accexits != null) {
-            # code...
-            return [
-                'code' => "402",
-                'error'=>"Account is exits",
-                'data'=>[
-                    'list'=>[]
-                ]
-            ];
-        }
-        $token = Crypt::encryptString($phone.'-'.$pass);
-        $acc = new Account();
-        $acc->phone = '';
-        $acc->password = Crypt::encryptString($pass);
-        $acc->email=$phone;
-        $acc->name=$name;
-        $acc->token=$token;
-        $acc->google='';
-        $acc->facebook='';
-        $acc->status=1;
-        $acc->save();
-        return [
-            'code' => "200",
-            'error'=>"",
-            'data'=>[
-                'account'=>['name'=>$name,'token'=>$token]
-            ]
-        ];
+
+        $user_param = array_merge(
+            $validator->validated(),
+            ['password' => bcrypt($request->password)]
+        );
+        $user_param['email'] = $request->phone;
+        $user_param['username'] = $request->phone;
+        $user_param['phone'] = $request->phone;
+
+        $user = User::create($user_param);
+
+        return response()->json([
+            'message' => 'User successfully registered',
+            'user' => $user
+        ], 201);
     }
 
     /**
@@ -129,60 +114,30 @@ class ApiController extends Controller
      *     )
      * )
      */
-    public function login(Request $req){
+    public function login(Request $request) {
+        $validator = Validator::make($request->all(), [
+            'phone' => 'required',
+            'password' => 'required|string',
+        ]);
 
-        $phone = $req->input('phone');
-        $pass = $req->input('password');
-        if ($phone == null || $pass == null) {
-            return [
-                'code' => "401",
-                'error'=>"Account not exists",
-                'data'=>[
-                    'list'=>[]
-                ]
-            ];
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
         }
 
-        $acc = Account::where('email', $phone)->first();
-        if ($acc == null) {
-            # code...
-            return [
-                'code' => "401",
-                'error'=>"Account not exists",
-                'data'=>[
-                    'list'=>[]
-                ]
-            ];
+        if (! $token = auth()->attempt($validator->validated())) {
+            return response()->json(['error' => 'Unauthorized'], 401);
         }
-        if ($acc->status == 0) {
-            # code...
-            return [
-                'code' => "401",
-                'error'=>"Account not exists",
-                'data'=>[
-                    'list'=>[]
-                ]
-            ];
-        }
-        $password = Crypt::decryptString($acc->password);
-        if ($password == $pass) {
-            # code...
-            return [
-            'code' => "200",
-            'error'=>"",
-            'data'=>[
-                'account'=>['name'=>$acc->name,'token'=>$acc->token]
-            ]
-        ];
-        }else{
-            return [
-                'code' => "401",
-                'error'=>"Tài khoản hoặc mật khẩu không đúng",
-                'data'=>[
-                    'list'=>[]
-                ]
-            ];
-        }
+
+        return $this->createNewToken($token);
+    }
+
+    protected function createNewToken($token){
+        return response()->json([
+            'access_token' => $token,
+            'token_type' => 'bearer',
+            'expires_in' => auth()->factory()->getTTL() * 60,
+            'user' => auth()->user()
+        ]);
     }
 
     /**
