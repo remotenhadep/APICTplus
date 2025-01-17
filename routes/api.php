@@ -21,4 +21,9 @@ Route::group([
     Route::post("live/tv/create", [ApiController::class, "createlivetv"]);
     Route::post("live/tv/update", [ApiController::class, "updatelivetv"]);
     Route::delete("live/tv/delete", [ApiController::class, "deletelivetv"]);
+
+    Route::get("live/radio", [ApiController::class, "liveradio"]);
+    Route::post("live/radio/create", [ApiController::class, "createliveradio"]);
+    Route::post("live/radio/update", [ApiController::class, "updateliveradio"]);
+    Route::delete("live/radio/delete", [ApiController::class, "deleteliveradio"]);
 });

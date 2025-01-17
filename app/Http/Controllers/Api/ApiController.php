@@ -443,7 +443,7 @@ class ApiController extends Controller
      *     ),
      *     @OA\Response(
      *         response=200,
-     *         description="Successful disabled with JWT token",
+     *         description="Successful create live tv",
      *         @OA\JsonContent(
      *             @OA\Property(property="message", type="string"),
      *             @OA\Property(property="data", type="array", @OA\Items(
@@ -627,6 +627,296 @@ class ApiController extends Controller
      */
 
      public function deletelivetv(Request $request) {        
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|exists:lichphatsongs,id'
+        ]);
+
+        if($validator->fails()){
+            return response()->json($validator->errors()->toJson(), 400);
+        }
+    	$object = LichPhatSong::find($request->id);
+        $object_name = $object->title;
+        $object->delete();
+        return [
+            'code' => "Xóa thành công " . $object_name,
+            'error' => ""
+        ];
+    }
+
+    /**
+     * @OA\GET(
+     *     path="/api/live/radio",
+     *     operationId="LiveRadio",
+     *     tags={"Others"},
+     *     summary="Radio Broadcast Schedule",
+     *     description="Radio Broadcast Schedule",
+     *     security={{"BearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="date",
+     *         in="query",
+     *         description="Day",
+     *         required=true,
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="code", type="string"),
+     *             @OA\Property(property="error", type="string"),
+     *             @OA\Property(property="data", type="array", @OA\Items(
+     *                  @OA\Property(property="live_url", type="string"),
+     *                  @OA\Property(property="playback_url", type="string"),
+     *                  @OA\Property(property="list", type="string"),
+     *              ))
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized"
+     *     )
+     * )
+     */
+    public function liveradio(Request $req) {
+    	$ngay = DateTime::createFromFormat('d/m/Y', $req->date)->format('Y-m-d');
+    	$lps = Lichphatsong::where([['ngay','=', $ngay],['type','=',1]])->get();
+		$conf = Config::where('name','liveTv')->first();
+		$conf1 = Config::where('name','playbackTv')->first();
+    	$rs = array();
+        $i = 1;
+        foreach ($lps as $k) {
+            # code...
+			$duration = 0;
+            $milisecon = 0;
+            $times = explode(":", $k->time);
+            if (count($times)==2) {
+            	# code...
+            	$milisecon = $times[0]*60*60 + $times[1]*60;
+            }
+            $timecode = str_replace("-", "", $k->timecode);
+            $timecode = str_replace(":", "", $timecode);
+            $timecode = str_replace(" ", "", $timecode);
+			$duration = $k->duration * 1000;
+            $l = ['id'=>$k->id,'time'=>$k->time,'title'=>$k->title, 'playliststart'=>$timecode, 'duration'=>$duration,'milisecon'=>$milisecon, 'timecode'=>$k->timecode, 'youtubeid'=>$k->youtubeid, 'url_mp4'=>$k->url_mp4];
+            array_push($rs, $l);
+            $i++;
+        }
+        return [
+            'code' => "200",
+            'error'=>"",
+            'data'=>[
+                'live_url' => $conf->value,
+				'playback_url' => $conf1->value,
+                'list'=>$rs
+            ]
+        ];
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/live/radio/create",
+     *     operationId="createLiveRadio",
+     *     tags={"Others"},
+     *     summary="Create Live Radio (api mới, cần check lại nghiệp vụ)",
+     *     description="Create Live Radio",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"ngay","time","title","youtubeid","url_mp4","duration"},
+     *             @OA\Property(property="ngay", type="string", format="string", example="17/01/2025"),
+     *             @OA\Property(property="time", type="string", format="text", example="15:00"),
+     *             @OA\Property(property="title", type="string", format="text"),
+     *             @OA\Property(property="youtubeid", type="string", format="text"),
+     *             @OA\Property(property="timecode", type="string", format="text", example="17/01/2025 15:00:24"),
+     *             @OA\Property(property="url_mp4", type="string", format="text"),
+     *             @OA\Property(property="duration", type="string", format="text")
+     *         ),
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful create live radio",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="data", type="array", @OA\Items(
+     *                      @OA\Property(property="id", type="string"),   
+     *                      @OA\Property(property="time", type="string"),      
+     *                      @OA\Property(property="title", type="string"),  
+     *                      @OA\Property(property="playliststart", type="string"),  
+     *                      @OA\Property(property="duration", type="string"),  
+     *                      @OA\Property(property="milisecon", type="string"),  
+     *                      @OA\Property(property="timecode", type="string"),  
+     *                      @OA\Property(property="youtubeid", type="string"),  
+     *                      @OA\Property(property="url_mp4", type="string")
+     *              ))
+     *         )
+     *     )
+     * )
+     */
+    public function createliveradio (Request $request){
+        $validator = Validator::make($request->all(), [
+            'ngay' => 'required|date_format:d/m/Y',
+            'time' => 'required',
+            'title' => 'required',
+            'youtubeid' => 'required',
+            'url_mp4' => 'required',
+            'timecode' => 'nullable|date_format:d/m/Y H:i:s',
+            'duration' => 'numeric|min:0|required'
+        ]);
+
+        if($validator->fails()){
+            return response()->json($validator->errors()->toJson(), 400);
+        }
+
+        $param = array_merge(
+            $validator->validated(),
+            ['ngay' => DateTime::createFromFormat('d/m/Y', $request->ngay)->format('Y-m-d'),
+            'timecode' => $request->timecode != '' ? DateTime::createFromFormat('d/m/Y H:i:s', $request->timecode)->format('Y-m-d H:i:s') : null]
+        );
+
+        $param['type'] = 1;
+
+        $object = LichPhatSong::create($param);
+        
+        $duration = 0;
+        $milisecon = 0;
+        $times = explode(":", $object->time);
+        if (count($times)==2) {
+            # code...
+            $milisecon = $times[0]*60*60 + $times[1]*60;
+        }
+        $timecode = str_replace("-", "", $object->timecode);
+        $timecode = str_replace(":", "", $timecode);
+        $timecode = str_replace(" ", "", $timecode);
+        $duration = $object->duration * 1000;
+        $result_data = ['id' => $object->id, 'time' => $object->time, 'title'=>$object->title, 
+            'playliststart' => $timecode, 'duration' => $duration,'milisecon' => $milisecon, 
+            'timecode'=>$object->timecode, 'youtubeid'=>$object->youtubeid, 'url_mp4'=>$object->url_mp4];
+            
+
+        return response()->json([
+            'message' => 'Create Live Radio successful',
+            'data' => $result_data
+        ], 201);
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/live/radio/update",
+     *     operationId="updateLiveRadio",
+     *     tags={"Others"},
+     *     summary="Update Live Radio (api mới, cần check lại nghiệp vụ)",
+     *     description="Update Live Radio",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"id","ngay","time","title","youtubeid","url_mp4","duration"},
+     *             @OA\Property(property="id", type="string", format="text"),
+     *             @OA\Property(property="ngay", type="string", format="text", example="17/01/2025"),
+     *             @OA\Property(property="time", type="string", format="text"),
+     *             @OA\Property(property="title", type="string", format="text"),
+     *             @OA\Property(property="youtubeid", type="string", format="text"),
+     *             @OA\Property(property="url_mp4", type="string", format="text"),
+     *             @OA\Property(property="timecode", type="string", format="text", example="17/01/2025 15:00:24"),
+     *             @OA\Property(property="duration", type="string", format="text")
+     *         ),
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful updated live radio",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="data", type="array", @OA\Items(
+     *                      @OA\Property(property="id", type="string"),   
+     *                      @OA\Property(property="time", type="string"),      
+     *                      @OA\Property(property="title", type="string"),  
+     *                      @OA\Property(property="playliststart", type="string"),  
+     *                      @OA\Property(property="duration", type="string"),  
+     *                      @OA\Property(property="milisecon", type="string"),  
+     *                      @OA\Property(property="timecode", type="string"),  
+     *                      @OA\Property(property="youtubeid", type="string"),  
+     *                      @OA\Property(property="url_mp4", type="string")
+     *              ))
+     *         )
+     *     )
+     * )
+     */
+    public function updateliveradio (Request $request){
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|exists:lichphatsongs,id',
+            'ngay' => 'required|date_format:d/m/Y',
+            'time' => 'required',
+            'title' => 'required',
+            'youtubeid' => 'required',
+            'url_mp4' => 'required',
+            'timecode' => 'nullable|date_format:d/m/Y H:i:s',
+            'duration' => 'numeric|min:0|required'
+        ]);
+
+        if($validator->fails()){
+            return response()->json($validator->errors()->toJson(), 400);
+        }
+
+        $object = LichPhatSong::find($request->id);
+        $object->ngay = DateTime::createFromFormat('d/m/Y', $request->ngay)->format('Y-m-d');
+        $object->time = $request->time;
+        $object->title = $request->title;
+        $object->youtubeid = $request->youtubeid;
+        $object->url_mp4 = $request->url_mp4;
+        $object->timecode = $request->timecode != '' ? DateTime::createFromFormat('d/m/Y H:i:s', $request->timecode)->format('Y-m-d H:i:s') : null;
+        $object->duration = $request->duration;
+
+        $object->update();
+        
+        $duration = 0;
+        $milisecon = 0;
+        $times = explode(":", $object->time);
+        if (count($times)==2) {
+            # code...
+            $milisecon = $times[0]*60*60 + $times[1]*60;
+        }
+        $timecode = str_replace("-", "", $object->timecode);
+        $timecode = str_replace(":", "", $timecode);
+        $timecode = str_replace(" ", "", $timecode);
+        $duration = $object->duration * 1000;
+        $result_data = ['id' => $object->id, 'time' => $object->time, 'title'=>$object->title, 
+            'playliststart' => $timecode, 'duration' => $duration,'milisecon' => $milisecon, 
+            'timecode'=>$object->timecode, 'youtubeid'=>$object->youtubeid, 'url_mp4'=>$object->url_mp4];            
+
+        return response()->json([
+            'message' => 'Update Live TV successful',
+            'data' => $result_data
+        ], 201);
+    }
+
+    /**
+     * @OA\DELETE(
+     *     path="/api/live/radio/delete",
+     *     operationId="deleteLiveRadio",
+     *     tags={"Others"},
+     *     summary="Delete Live Radio (api mới, cần check lại nghiệp vụ)",
+     *     description="Delete Live Radio",
+     *     security={{"BearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="query",
+     *         description="id",
+     *         required=true,
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="code", type="string"),
+     *             @OA\Property(property="error", type="string")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized"
+     *     )
+     * )
+     */
+
+     public function deleteliveradio(Request $request) {        
         $validator = Validator::make($request->all(), [
             'id' => 'required|exists:lichphatsongs,id'
         ]);
