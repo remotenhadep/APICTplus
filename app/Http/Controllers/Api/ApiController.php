@@ -28,25 +28,25 @@ class ApiController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"phone","password","name"},
-     *             @OA\Property(property="phone", type="string", format="text"),
-     *             @OA\Property(property="password", type="string", format="password"),
+     *             required={"name","username","email","password"},
      *             @OA\Property(property="name", type="string", format="text"),
+     *             @OA\Property(property="password", type="string", format="password"),
+     *             @OA\Property(property="username", type="string", format="text"),
+     *             @OA\Property(property="phone", type="string", format="text"),
+     *             @OA\Property(property="email", type="string", format="text"),
      *         ),
      *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Successful register with JWT token",
      *         @OA\JsonContent(
-     *             @OA\Property(property="code", type="string"),
-     *             @OA\Property(property="error", type="string"),
-     *             @OA\Property(property="data", type="array", @OA\Items(
-     *                  @OA\Property(property="account", type="array", 
-     *                  @OA\Items(
-     *                      @OA\Property(property="name", type="string"),      
-     *                      @OA\Property(property="token", type="string")
-    *                    ))
-    *              ))
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="user", type="array", @OA\Items(
+     *                 @OA\Property(property="name", type="string"),      
+     *                      @OA\Property(property="username", type="string"),  
+     *                      @OA\Property(property="phone", type="string"),  
+     *                      @OA\Property(property="email", type="string")
+     *              ))
      *         )
      *     )
      * )
@@ -54,7 +54,9 @@ class ApiController extends Controller
     public function register(Request $request){
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|between:2,100',
-            'phone' => 'required|string|max:100|unique:users',
+            'username' => 'required|string|between:2,100',
+            'email' => 'required|string|max:100|email|unique:users',
+            'phone' => 'nullable|string|max:100|unique:users',
             'password' => 'required|string',
         ]);
 
@@ -66,15 +68,12 @@ class ApiController extends Controller
             $validator->validated(),
             ['password' => bcrypt($request->password)]
         );
-        $user_param['email'] = $request->phone;
-        $user_param['username'] = $request->phone;
-        $user_param['phone'] = $request->phone;
 
         $user = User::create($user_param);
 
         return response()->json([
             'message' => 'User successfully registered',
-            'user' => $user
+            'user' => $user->only(['username', 'name', 'phone', 'email'])
         ], 201);
     }
 
@@ -88,8 +87,8 @@ class ApiController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"email","password"},
-     *             @OA\Property(property="phone", type="string", format="text"),
+     *             required={"username","password"},
+     *             @OA\Property(property="username", type="string", format="text"),
      *             @OA\Property(property="password", type="string", format="password")
      *         ),
      *     ),
@@ -97,15 +96,15 @@ class ApiController extends Controller
      *         response=200,
      *         description="Successful register with JWT token",
      *         @OA\JsonContent(
-     *             @OA\Property(property="code", type="string"),
-     *             @OA\Property(property="error", type="string"),
-     *             @OA\Property(property="data", type="array", @OA\Items(
-     *                  @OA\Property(property="account", type="array", 
-     *                  @OA\Items(
-     *                      @OA\Property(property="name", type="string"),      
-     *                      @OA\Property(property="token", type="string")
-     *                    ))
-     *              ))
+     *             @OA\Property(property="access_token", type="string"),
+     *             @OA\Property(property="token_type", type="string"),
+     *             @OA\Property(property="expires_in", type="string"),
+     *             @OA\Property(property="user", type="array", @OA\Items(
+     *                 @OA\Property(property="name", type="string"),      
+*                      @OA\Property(property="phone", type="string"),  
+*                      @OA\Property(property="email", type="string"),  
+*                      @OA\Property(property="username", type="string")
+    *              ))
      *         )
      *     ),
      *     @OA\Response(
@@ -116,7 +115,7 @@ class ApiController extends Controller
      */
     public function login(Request $request) {
         $validator = Validator::make($request->all(), [
-            'phone' => 'required',
+            'username' => 'required',
             'password' => 'required|string',
         ]);
 
@@ -136,7 +135,7 @@ class ApiController extends Controller
             'access_token' => $token,
             'token_type' => 'bearer',
             'expires_in' => auth()->factory()->getTTL() * 60,
-            'user' => auth()->user()
+            'user' => auth()->user()->only(['username', 'name', 'phone', 'email'])
         ]);
     }
 
@@ -164,7 +163,7 @@ class ApiController extends Controller
      *                  @OA\Property(property="live_url", type="string"),
      *                  @OA\Property(property="playback_url", type="string"),
      *                  @OA\Property(property="list", type="string"),
-    *              ))
+     *              ))
      *         )
      *     ),
      *     @OA\Response(
@@ -206,5 +205,218 @@ class ApiController extends Controller
                 'list'=>$rs
             ]
         ];
+    }
+
+    /**
+     * @OA\GET(
+     *     path="/api/users/list",
+     *     operationId="UserList",
+     *     tags={"Users"},
+     *     summary="List of users",
+     *     description="List of users",
+     *     security={{"BearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="code", type="string"),
+     *             @OA\Property(property="error", type="string"),
+     *             @OA\Property(property="data", type="array", @OA\Items(
+     *                  @OA\Property(property="user_list", type="array", @OA\Items(
+        *                  @OA\Property(property="username", type="string"),
+        *                  @OA\Property(property="name", type="string"),
+        *                  @OA\Property(property="phone", type="string"),
+        *                  @OA\Property(property="email", type="string")
+        *              ))
+     *              ))
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized"
+     *     )
+     * )
+     */
+
+    public function userlist(Request $request) {
+    	$data = User::where([['status','=', 1]])->orderBy('name')
+            ->select('id', 'username', 'name', 'phone', 'email')
+            ->get();
+        return [
+            'code' => "200",
+            'error' => "",
+            'data' => $data
+        ];
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/users/create",
+     *     operationId="createUser",
+     *     tags={"Users"},
+     *     summary="User Create",
+     *     description="Create New User",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"name","username","email","password"},
+     *             @OA\Property(property="name", type="string", format="text"),
+     *             @OA\Property(property="password", type="string", format="password"),
+     *             @OA\Property(property="username", type="string", format="text"),
+     *             @OA\Property(property="phone", type="string", format="text"),
+     *             @OA\Property(property="email", type="string", format="text"),
+     *         ),
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful register with JWT token",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="user", type="array", @OA\Items(
+     *                      @OA\Property(property="id", type="string"),   
+     *                      @OA\Property(property="name", type="string"),      
+     *                      @OA\Property(property="username", type="string"),  
+     *                      @OA\Property(property="phone", type="string"),  
+     *                      @OA\Property(property="email", type="string")
+     *              ))
+     *         )
+     *     )
+     * )
+     */
+    public function usercreate (Request $request){
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|between:2,100',
+            'username' => 'required|string|between:2,100',
+            'email' => 'required|string|max:100|email|unique:users',
+            'phone' => 'nullable|string|max:100|unique:users',
+            'password' => 'required|string',
+        ]);
+
+        if($validator->fails()){
+            return response()->json($validator->errors()->toJson(), 400);
+        }
+
+        $user_param = array_merge(
+            $validator->validated(),
+            ['password' => bcrypt($request->password)]
+        );
+
+        $user = User::create($user_param);
+
+        return response()->json([
+            'message' => 'User successfully created',
+            'user' => $user->only(['username', 'name', 'phone', 'email'])
+        ], 201);
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/users/update",
+     *     operationId="updateUser",
+     *     tags={"Users"},
+     *     summary="User Update",
+     *     description="Update User",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"id","name","email","password","phone"},
+     *             @OA\Property(property="name", type="string", format="text"),
+     *             @OA\Property(property="password", type="string", format="password"),
+     *             @OA\Property(property="id", type="string", format="text"),
+     *             @OA\Property(property="phone", type="string", format="text"),
+     *             @OA\Property(property="email", type="string", format="text"),
+     *         ),
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful update user with JWT token",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="user", type="array", @OA\Items(
+     *                      @OA\Property(property="id", type="string"),   
+     *                      @OA\Property(property="name", type="string"),      
+     *                      @OA\Property(property="username", type="string"),  
+     *                      @OA\Property(property="phone", type="string"),  
+     *                      @OA\Property(property="email", type="string")
+     *              ))
+     *         )
+     *     )
+     * )
+     */
+    public function userupdate (Request $request){
+        $validator = Validator::make($request->all(), [
+            'id' => 'required',
+            'name' => 'required|string|between:2,100',
+            'username' => 'required|string|between:2,100',
+            'email' => 'required|string|max:100|email|unique:users,email,' . $request->id,
+            'phone' => 'nullable|string|max:100|unique:users,phone,' . $request->id,
+            'password' => 'required|string',
+        ]);
+
+        if($validator->fails()){
+            return response()->json($validator->errors()->toJson(), 400);
+        }
+
+        $user = User::find($request->id);
+        $user->name = $request->name;
+        $user->username = $request->username;
+        $user->email = $request->email;
+        $user->phone = $request->phone;
+        $user->password = bcrypt($request->password);
+        $user->update();
+
+        return response()->json([
+            'message' => 'User successfully updated',
+            'user' => $user->only(['username', 'name', 'phone', 'email'])
+        ], 201);
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/users/disabled",
+     *     operationId="disabledUser",
+     *     tags={"Users"},
+     *     summary="Disabled Update",
+     *     description="Disabled User",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"id"},
+     *             @OA\Property(property="id", type="string", format="text")
+     *         ),
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful disabled with JWT token",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="user", type="array", @OA\Items(
+     *                      @OA\Property(property="id", type="string"),   
+     *                      @OA\Property(property="name", type="string"),      
+     *                      @OA\Property(property="username", type="string"),  
+     *                      @OA\Property(property="phone", type="string"),  
+     *                      @OA\Property(property="email", type="string")
+     *              ))
+     *         )
+     *     )
+     * )
+     */
+    public function userdisabled (Request $request){
+        $validator = Validator::make($request->all(), [
+            'id' => 'required'
+        ]);
+
+        if($validator->fails()){
+            return response()->json($validator->errors()->toJson(), 400);
+        }
+
+        $user = User::find($request->id);
+        $user->status = 0;
+        $user->update();
+
+        return response()->json([
+            'message' => 'User successfully disabled',
+            'user' => $user->only(['username', 'name', 'phone', 'email', 'status'])
+        ], 201);
     }
 }

@@ -10,5 +10,12 @@ Route::post("login", [ApiController::class, "login"]);
 Route::group([
     "middleware" => ["auth:api"]
 ], function(){
+    // users    
+    Route::get("users/list", [ApiController::class, "userlist"]);
+    Route::post("users/create", [ApiController::class, "usercreate"]);
+    Route::post("users/update", [ApiController::class, "userupdate"]);
+    Route::post("users/disabled", [ApiController::class, "userdisabled"]);
+
+    // television and radio
     Route::get("live/tv", [ApiController::class, "livetv"]);
 });

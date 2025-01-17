@@ -5,7 +5,7 @@
         "version": "0.1"
     },
     "paths": {
-        "/canthoplus/api/register": {
+        "/api/register": {
             "post": {
                 "tags": [
                     "Authentication"
@@ -19,12 +19,13 @@
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "phone",
-                                    "password",
-                                    "name"
+                                    "name",
+                                    "username",
+                                    "email",
+                                    "password"
                                 ],
                                 "properties": {
-                                    "phone": {
+                                    "name": {
                                         "type": "string",
                                         "format": "text"
                                     },
@@ -32,7 +33,15 @@
                                         "type": "string",
                                         "format": "password"
                                     },
-                                    "name": {
+                                    "username": {
+                                        "type": "string",
+                                        "format": "text"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "format": "text"
+                                    },
+                                    "email": {
                                         "type": "string",
                                         "format": "text"
                                     }
@@ -49,29 +58,24 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "code": {
+                                        "message": {
                                             "type": "string"
                                         },
-                                        "error": {
-                                            "type": "string"
-                                        },
-                                        "data": {
+                                        "user": {
                                             "type": "array",
                                             "items": {
                                                 "properties": {
-                                                    "account": {
-                                                        "type": "array",
-                                                        "items": {
-                                                            "properties": {
-                                                                "name": {
-                                                                    "type": "string"
-                                                                },
-                                                                "token": {
-                                                                    "type": "string"
-                                                                }
-                                                            },
-                                                            "type": "object"
-                                                        }
+                                                    "name": {
+                                                        "type": "string"
+                                                    },
+                                                    "username": {
+                                                        "type": "string"
+                                                    },
+                                                    "phone": {
+                                                        "type": "string"
+                                                    },
+                                                    "email": {
+                                                        "type": "string"
                                                     }
                                                 },
                                                 "type": "object"
@@ -86,7 +90,7 @@
                 }
             }
         },
-        "/canthoplus/api/login": {
+        "/api/login": {
             "post": {
                 "tags": [
                     "Authentication"
@@ -100,11 +104,11 @@
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "email",
+                                    "username",
                                     "password"
                                 ],
                                 "properties": {
-                                    "phone": {
+                                    "username": {
                                         "type": "string",
                                         "format": "text"
                                     },
@@ -125,29 +129,30 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "code": {
+                                        "access_token": {
                                             "type": "string"
                                         },
-                                        "error": {
+                                        "token_type": {
                                             "type": "string"
                                         },
-                                        "data": {
+                                        "expires_in": {
+                                            "type": "string"
+                                        },
+                                        "user": {
                                             "type": "array",
                                             "items": {
                                                 "properties": {
-                                                    "account": {
-                                                        "type": "array",
-                                                        "items": {
-                                                            "properties": {
-                                                                "name": {
-                                                                    "type": "string"
-                                                                },
-                                                                "token": {
-                                                                    "type": "string"
-                                                                }
-                                                            },
-                                                            "type": "object"
-                                                        }
+                                                    "name": {
+                                                        "type": "string"
+                                                    },
+                                                    "phone": {
+                                                        "type": "string"
+                                                    },
+                                                    "email": {
+                                                        "type": "string"
+                                                    },
+                                                    "username": {
+                                                        "type": "string"
                                                     }
                                                 },
                                                 "type": "object"
@@ -227,6 +232,318 @@
                     }
                 ]
             }
+        },
+        "/api/users/list": {
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "List of users",
+                "description": "List of users",
+                "operationId": "UserList",
+                "responses": {
+                    "200": {
+                        "description": "Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "code": {
+                                            "type": "string"
+                                        },
+                                        "error": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "user_list": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "username": {
+                                                                    "type": "string"
+                                                                },
+                                                                "name": {
+                                                                    "type": "string"
+                                                                },
+                                                                "phone": {
+                                                                    "type": "string"
+                                                                },
+                                                                "email": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/users/create": {
+            "post": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "User Create",
+                "description": "Create New User",
+                "operationId": "createUser",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "username",
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "format": "text"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password"
+                                    },
+                                    "username": {
+                                        "type": "string",
+                                        "format": "text"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "format": "text"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "text"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful register with JWT token",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "user": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "string"
+                                                    },
+                                                    "name": {
+                                                        "type": "string"
+                                                    },
+                                                    "username": {
+                                                        "type": "string"
+                                                    },
+                                                    "phone": {
+                                                        "type": "string"
+                                                    },
+                                                    "email": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/users/update": {
+            "post": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "User Update",
+                "description": "Update User",
+                "operationId": "updateUser",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "id",
+                                    "name",
+                                    "email",
+                                    "password",
+                                    "phone"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "format": "text"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password"
+                                    },
+                                    "id": {
+                                        "type": "string",
+                                        "format": "text"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "format": "text"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "text"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful update user with JWT token",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "user": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "string"
+                                                    },
+                                                    "name": {
+                                                        "type": "string"
+                                                    },
+                                                    "username": {
+                                                        "type": "string"
+                                                    },
+                                                    "phone": {
+                                                        "type": "string"
+                                                    },
+                                                    "email": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/users/disabled": {
+            "post": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Disabled Update",
+                "description": "Disabled User",
+                "operationId": "disabledUser",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "id"
+                                ],
+                                "properties": {
+                                    "id": {
+                                        "type": "string",
+                                        "format": "text"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful disabled with JWT token",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "user": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "string"
+                                                    },
+                                                    "name": {
+                                                        "type": "string"
+                                                    },
+                                                    "username": {
+                                                        "type": "string"
+                                                    },
+                                                    "phone": {
+                                                        "type": "string"
+                                                    },
+                                                    "email": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -246,6 +563,10 @@
         {
             "name": "Others",
             "description": "Others"
+        },
+        {
+            "name": "Users",
+            "description": "Users"
         }
     ],
     "security": [
