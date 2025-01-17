@@ -531,7 +531,7 @@ class ApiController extends Controller
      *     ),
      *     @OA\Response(
      *         response=200,
-     *         description="Successful disabled with JWT token",
+     *         description="Successful updated live tv",
      *         @OA\JsonContent(
      *             @OA\Property(property="message", type="string"),
      *             @OA\Property(property="data", type="array", @OA\Items(
