@@ -10,6 +10,10 @@ use App\Models\Account;
 use Illuminate\Support\Facades\Crypt;
 use App\Models\Config;
 use App\Models\Lichphatsong;
+use App\Models\Category;
+use App\Models\Video;
+use App\Models\Playlist;
+use App\Models\Plus;
 use Auth;
 use Validator;
 use DateTime;
@@ -19,6 +23,7 @@ class ApiController extends Controller
     public function __construct() {
         $this->middleware('auth:api', ['except' => ['login', 'register']]);
     }
+
     /**
      * @OA\Post(
      *     path="/api/register",
@@ -102,10 +107,10 @@ class ApiController extends Controller
      *             @OA\Property(property="expires_in", type="string"),
      *             @OA\Property(property="user", type="array", @OA\Items(
      *                 @OA\Property(property="name", type="string"),      
-*                      @OA\Property(property="phone", type="string"),  
-*                      @OA\Property(property="email", type="string"),  
-*                      @OA\Property(property="username", type="string")
-    *              ))
+     *                      @OA\Property(property="phone", type="string"),  
+     *                      @OA\Property(property="email", type="string"),  
+     *                      @OA\Property(property="username", type="string")
+     *              ))
      *         )
      *     ),
      *     @OA\Response(
@@ -114,6 +119,7 @@ class ApiController extends Controller
      *     )
      * )
      */
+
     public function login(Request $request) {
         $validator = Validator::make($request->all(), [
             'username' => 'required',
@@ -626,7 +632,7 @@ class ApiController extends Controller
      * )
      */
 
-     public function deletelivetv(Request $request) {        
+    public function deletelivetv(Request $request) {        
         $validator = Validator::make($request->all(), [
             'id' => 'required|exists:lichphatsongs,id'
         ]);
@@ -916,7 +922,7 @@ class ApiController extends Controller
      * )
      */
 
-     public function deleteliveradio(Request $request) {        
+    public function deleteliveradio(Request $request) {        
         $validator = Validator::make($request->all(), [
             'id' => 'required|exists:lichphatsongs,id'
         ]);
@@ -925,6 +931,255 @@ class ApiController extends Controller
             return response()->json($validator->errors()->toJson(), 400);
         }
     	$object = LichPhatSong::find($request->id);
+        $object_name = $object->title;
+        $object->delete();
+        return [
+            'code' => "Xóa thành công " . $object_name,
+            'error' => ""
+        ];
+    }
+
+    /**
+     * @OA\GET(
+     *     path="/api/categories/list",
+     *     operationId="CategoriesList",
+     *     tags={"Categories"},
+     *     summary="Categories List",
+     *     description="Categories List",
+     *     security={{"BearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="parentid",
+     *         in="query",
+     *         description="Parent category id",
+     *         required=false,
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="code", type="string"),
+     *             @OA\Property(property="error", type="string"),
+     *             @OA\Property(property="data", type="array", @OA\Items(
+     *                  @OA\Property(property="list", type="array", @OA\Items(
+     *                      @OA\Property(property="id", type="string"),
+     *                      @OA\Property(property="parent_id", type="string"),
+     *                      @OA\Property(property="title", type="string"),
+     *                      @OA\Property(property="order", type="string")
+     *                  ))
+     *              ))
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized"
+     *     )
+     * )
+     */
+    public function categories(Request $request) {
+        $parentid = 0;
+        if ($request->parentid != '') {
+            $parentid = $request->parentid;
+        }
+    	$cates = Category::where([['parentid','=',$parentid],['status','=', 1]])->orderby('order')->get();
+        $rs = array();
+        foreach ($cates as $cate) {
+            $c = ['id'=>$cate->id,'parent_id'=>$cate->parentid,'title'=>$cate->title, 'order'=>$cate->order];
+            array_push($rs, $c);
+        }
+        return [
+            'code' => "200",
+            'error'=>"",
+            'data'=>[
+                'list'=>$rs
+            ]
+        ];
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/categories/create",
+     *     operationId="createCategory",
+     *     tags={"Categories"},
+     *     summary="Create Categories (api mới, cần check lại nghiệp vụ)",
+     *     description="Create Categories",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"title","parentid"},
+     *             @OA\Property(property="title", type="string", format="string"),
+     *             @OA\Property(property="parentid", type="string", format="string"),
+     *             @OA\Property(property="order", type="string", format="string"),
+     *             @OA\Property(property="status", type="string", format="string")
+     *         ),
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful create category",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="code", type="string"),
+     *             @OA\Property(property="error", type="string"),
+     *             @OA\Property(property="data", type="array", @OA\Items(
+     *                  @OA\Property(property="list", type="array", @OA\Items(
+     *                      @OA\Property(property="id", type="string"),
+     *                      @OA\Property(property="parent_id", type="string"),
+     *                      @OA\Property(property="title", type="string"),
+     *                      @OA\Property(property="order", type="string"),     * 
+     *                      @OA\Property(property="status", type="string")
+     *                  ))
+     *              ))
+     *         )
+     *     )
+     * )
+     */
+    public function createcategories (Request $request){
+        $validator = Validator::make($request->all(), [
+            'title' => 'required|max:255',
+            'parentid' => 'required'
+        ]);
+
+        if($validator->fails()){
+            return response()->json($validator->errors()->toJson(), 400);
+        }
+        
+        $param =  Array(
+            'title' => $request->title,
+            'parentid' => $request->parentid,
+            'order' => $request->order != '' ? $request->order : 100,
+            'status' => $request->status != '' ? $request->status : 1,
+        );
+
+        $object = Category::create($param);            
+
+        return response()->json([
+            'message' => 'Create category successful',
+            'data' => ['id'=>$object->id,'parent_id'=>$object->parentid,'title'=>$object->title, 
+                'order'=>$object->order, 'status' => $object->status]
+        ], 201);
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/categories/update",
+     *     operationId="updateCategory",
+     *     tags={"Categories"},
+     *     summary="Update Categories (api mới, cần check lại nghiệp vụ)",
+     *     description="Update Categories",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"id","title","parentid","order","status"},
+     *             @OA\Property(property="id", type="string", format="string"),
+     *             @OA\Property(property="title", type="string", format="string"),
+     *             @OA\Property(property="parentid", type="string", format="string"),
+     *             @OA\Property(property="order", type="string", format="string"),
+     *             @OA\Property(property="status", type="string", format="string")
+     *         ),
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful update category",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="code", type="string"),
+     *             @OA\Property(property="error", type="string"),
+     *             @OA\Property(property="data", type="array", @OA\Items(
+     *                  @OA\Property(property="list", type="array", @OA\Items(
+     *                      @OA\Property(property="id", type="string"),
+     *                      @OA\Property(property="parent_id", type="string"),
+     *                      @OA\Property(property="title", type="string"),
+     *                      @OA\Property(property="order", type="string"),
+     *                      @OA\Property(property="status", type="string")
+     *                  ))
+     *              ))
+     *         )
+     *     )
+     * )
+     */
+    public function updatecategories (Request $request){
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|exists:categories,id',
+            'title' => 'required|max:255',
+            'parentid' => 'required',
+            'order' => 'required|numeric|min:0',
+            'status' => 'required|numeric|min:0|max:1',
+        ]);
+
+        if($validator->fails()){
+            return response()->json($validator->errors()->toJson(), 400);
+        }
+
+        $object = Category::find($request->id);
+        $object->title  = $request->title;  
+        $object->parentid  = $request->parentid;
+        if ($request->order != '') {
+            $object->order  = $request->order;
+        }
+        if ($request->status != '') {
+            $object->status  = $request->status;
+        }
+
+        return response()->json([
+            'message' => 'Update category successful',
+            'data' => ['id'=>$object->id,'parent_id'=>$object->parentid,'title'=>$object->title, 
+                'order'=>$object->order, 'status' => $object->status]
+        ], 201);
+    }
+
+    /**
+     * @OA\DELETE(
+     *     path="/api/categories/delete",
+     *     operationId="deleteCategories",
+     *     tags={"Categories"},
+     *     summary="Delete Category (api mới, cần check lại nghiệp vụ)",
+     *     description="Delete Category",
+     *     security={{"BearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="query",
+     *         description="id",
+     *         required=true,
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="code", type="string"),
+     *             @OA\Property(property="error", type="string")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized"
+     *     )
+     * )
+     */
+
+    public function deletecategories (Request $request) {        
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|exists:categories,id'
+        ]);
+
+        if($validator->fails()){
+            return response()->json($validator->errors()->toJson(), 400);
+        }
+        if (Video::where('category_id', $request->id)->count() > 0) {
+            return [
+                'code' => "Cannot delete [Video]",
+                'error' => ""
+            ];
+        }
+        if (Playlist::where('category_id', $request->id)->count() > 0) {
+            return [
+                'code' => "Cannot delete [Playlist]",
+                'error' => ""
+            ];
+        }
+        if (Plus::where('category_id', $request->id)->count() > 0) {
+            return [
+                'code' => "Cannot delete [Plus]",
+                'error' => ""
+            ];
+        }
+    	$object = Category::find($request->id);
         $object_name = $object->title;
         $object->delete();
         return [
