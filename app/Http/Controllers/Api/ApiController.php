@@ -1305,18 +1305,21 @@ class ApiController extends Controller
         }
         
         $param =  Array(
+            'playlistid' => $request->playlistid,
             'title' => $request->title,
-            'parentid' => $request->parentid,
-            'order' => $request->order != '' ? $request->order : 100,
-            'status' => $request->status != '' ? $request->status : 1,
+            'category_id' => $request->category_id,
+            'publishedat' => DateTime::createFromFormat('d/m/Y H:i:s', $request->publishedat)->format('Y-m-d H:i:s'),
+            'thumbnail' => $request->thumbnail,
+            'nextpagetoken' => $request->nextpagetoken,
         );
 
-        $object = Category::create($param);            
+        $object = Playlist::create($param);            
 
         return response()->json([
             'message' => 'Create category successful',
-            'data' => ['id'=>$object->id,'parent_id'=>$object->parentid,'title'=>$object->title, 
-                'order'=>$object->order, 'status' => $object->status]
+            'data' => ['id'=>$object->id,'playlistid'=>$object->playlistid,'title'=>$object->title, 
+                'category_id'=>$object->category_id, 'publishedat' => $object->publishedat,
+                'thumbnail'=>$object->thumbnail, 'nextpagetoken' => $object->nextpagetoken]
         ], 201);
     }
 }
