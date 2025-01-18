@@ -32,4 +32,10 @@ Route::group([
     Route::post("categories/create", [ApiController::class, "createcategories"]);
     Route::post("categories/update", [ApiController::class, "updatecategories"]);
     Route::delete("categories/delete", [ApiController::class, "deletecategories"]);
+
+    // categories
+    Route::get("playlists/list", [ApiController::class, "playlists"]);
+    Route::post("playlists/create", [ApiController::class, "createplaylists"]);
+    Route::post("playlists/update", [ApiController::class, "updateplaylists"]);
+    Route::delete("playlists/delete", [ApiController::class, "deleteplaylists"]);
 });

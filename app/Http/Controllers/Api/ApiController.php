@@ -1099,8 +1099,8 @@ class ApiController extends Controller
             'id' => 'required|exists:categories,id',
             'title' => 'required|max:255',
             'parentid' => 'required',
-            'order' => 'required|numeric|min:0',
-            'status' => 'required|numeric|min:0|max:1',
+            'order' => 'nullable|numeric|min:0',
+            'status' => 'nullable|numeric|min:0|max:1',
         ]);
 
         if($validator->fails()){
@@ -1116,6 +1116,8 @@ class ApiController extends Controller
         if ($request->status != '') {
             $object->status  = $request->status;
         }
+
+        $object->update();
 
         return response()->json([
             'message' => 'Update category successful',
@@ -1186,5 +1188,135 @@ class ApiController extends Controller
             'code' => "Xóa thành công " . $object_name,
             'error' => ""
         ];
+    }
+
+    /**
+     * @OA\GET(
+     *     path="/api/playlists/list",
+     *     operationId="PlaylistsList",
+     *     tags={"Playlists"},
+     *     summary="Playlists List",
+     *     description="Playlists List",
+     *     security={{"BearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="category_id",
+     *         in="query",
+     *         description="Category id",
+     *         required=false,
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="code", type="string"),
+     *             @OA\Property(property="error", type="string"),
+     *             @OA\Property(property="data", type="array", @OA\Items(
+     *                  @OA\Property(property="list", type="array", @OA\Items(
+     *                      @OA\Property(property="id", type="string"),
+     *                      @OA\Property(property="playlistid", type="string"),
+     *                      @OA\Property(property="title", type="string"),
+     *                      @OA\Property(property="category_id", type="string"),
+     *                      @OA\Property(property="publishedat", type="string"),
+     *                      @OA\Property(property="thumbnail", type="string"),
+     *                      @OA\Property(property="nextpagetoken", type="string")
+     *                  ))
+     *              ))
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized"
+     *     )
+     * )
+     */
+    public function playlists(Request $request) {
+        if ($request->category_id == '') {
+            $data = Playlist::orderby('created_at', 'desc')->orderby('title', 'asc')->get();
+        } else {
+            $data = Playlist::where('cateogry_id', $request->category_id)->orderby('created_at', 'desc')->orderby('title', 'asc')->get();
+        }
+
+        $rs = array();
+        foreach ($data as $item) {
+            $c = ['id' => $item->id, 'playlistid' => $item->playlistid, 'title'=>$item->title, 'category_id'=>$item->category_id,
+                'publishedat'=>$item->publishedat, 'thumbnail'=>$item->thumbnail, 'nextpagetoken'=>$item->nextpagetoken];
+            array_push($rs, $c);
+        }
+        return [
+            'code' => "200",
+            'error'=>"",
+            'data'=>[
+                'list'=>$rs
+            ]
+        ];
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/playlists/create",
+     *     operationId="createPlaylist",
+     *     tags={"Playlists"},
+     *     summary="Create Playlist (api mới, cần check lại nghiệp vụ)",
+     *     description="Create Playlist",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"playlistid","title", "category_id", "publishedat", "thumbnail", "nextpagetoken"},
+     *             @OA\Property(property="playlistid", type="string", format="string"),
+     *             @OA\Property(property="title", type="string", format="string"),
+     *             @OA\Property(property="category_id", type="string", format="string"),
+     *             @OA\Property(property="publishedat", type="string", format="string"),
+     *             @OA\Property(property="thumbnail", type="string", format="string"),
+     *             @OA\Property(property="nextpagetoken", type="string", format="string")
+     *         ),
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful create category",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="code", type="string"),
+     *             @OA\Property(property="error", type="string"),
+     *             @OA\Property(property="data", type="array", @OA\Items(
+     *                  @OA\Property(property="list", type="array", @OA\Items(
+     *                      @OA\Property(property="playlistid", type="string", format="string"),
+     *                      @OA\Property(property="title", type="string", format="string"),
+     *                      @OA\Property(property="category_id", type="string", format="string"),
+     *                      @OA\Property(property="publishedat", type="string", format="string"),
+     *                      @OA\Property(property="thumbnail", type="string", format="string"),
+     *                      @OA\Property(property="nextpagetoken", type="string", format="string")
+     *                  ))
+     *              ))
+     *         )
+     *     )
+     * )
+     */
+    public function createplaylists (Request $request){
+        $validator = Validator::make($request->all(), [
+            'playlistid' => 'required|max:255',
+            'title' => 'required|max:255',
+            'category_id' => 'required|exists:categories,id',
+            'publishedat' => 'required|date_format:d/m/Y H:i:s',
+            'thumbnail' => 'required|max:255',
+            'nextpagetoken' => 'required|max:255'
+        ]);
+
+        if($validator->fails()){
+            return response()->json($validator->errors()->toJson(), 400);
+        }
+        
+        $param =  Array(
+            'title' => $request->title,
+            'parentid' => $request->parentid,
+            'order' => $request->order != '' ? $request->order : 100,
+            'status' => $request->status != '' ? $request->status : 1,
+        );
+
+        $object = Category::create($param);            
+
+        return response()->json([
+            'message' => 'Create category successful',
+            'data' => ['id'=>$object->id,'parent_id'=>$object->parentid,'title'=>$object->title, 
+                'order'=>$object->order, 'status' => $object->status]
+        ], 201);
     }
 }
