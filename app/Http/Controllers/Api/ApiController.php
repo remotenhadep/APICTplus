@@ -1278,6 +1278,7 @@ class ApiController extends Controller
      *             @OA\Property(property="error", type="string"),
      *             @OA\Property(property="data", type="array", @OA\Items(
      *                  @OA\Property(property="list", type="array", @OA\Items(
+     *                      @OA\Property(property="id", type="string", format="string"),
      *                      @OA\Property(property="playlistid", type="string", format="string"),
      *                      @OA\Property(property="title", type="string", format="string"),
      *                      @OA\Property(property="category_id", type="string", format="string"),
@@ -1321,5 +1322,131 @@ class ApiController extends Controller
                 'category_id'=>$object->category_id, 'publishedat' => $object->publishedat,
                 'thumbnail'=>$object->thumbnail, 'nextpagetoken' => $object->nextpagetoken]
         ], 201);
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/playlists/update",
+     *     operationId="updatePlaylist",
+     *     tags={"Playlists"},
+     *     summary="Update Playlists (api mới, cần check lại nghiệp vụ)",
+     *     description="Update Playlists",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"id","playlistid","title","category_id","publishedat","thumbnail","nextpagetoken"},
+     *             @OA\Property(property="id", type="string", format="string"),
+     *             @OA\Property(property="playlistid", type="string", format="string"),
+     *             @OA\Property(property="title", type="string", format="string"),
+     *             @OA\Property(property="category_id", type="string", format="string"),
+     *             @OA\Property(property="publishedat", type="string", format="string"),
+     *             @OA\Property(property="thumbnail", type="string", format="string"),
+     *             @OA\Property(property="nextpagetoken", type="string", format="string")
+     *         ),
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful update category",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="code", type="string"),
+     *             @OA\Property(property="error", type="string"),
+     *             @OA\Property(property="data", type="array", @OA\Items(
+     *                  @OA\Property(property="list", type="array", @OA\Items(
+     *                      @OA\Property(property="id", type="string", format="string"),
+     *                      @OA\Property(property="playlistid", type="string", format="string"),
+     *                      @OA\Property(property="title", type="string", format="string"),
+     *                      @OA\Property(property="category_id", type="string", format="string"),
+     *                      @OA\Property(property="publishedat", type="string", format="string"),
+     *                      @OA\Property(property="thumbnail", type="string", format="string"),
+     *                      @OA\Property(property="nextpagetoken", type="string", format="string")
+     *                  ))
+     *              ))
+     *         )
+     *     )
+     * )
+     */
+    public function updateplaylists (Request $request){
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|exists:playlists,id',
+            'playlistid' => 'required|max:255',
+            'title' => 'required|max:255',
+            'category_id' => 'required|exists:categories,id',
+            'publishedat' => 'required|date_format:d/m/Y H:i:s',
+            'thumbnail' => 'required|max:255',
+            'nextpagetoken' => 'required|max:255'
+        ]);
+
+        if($validator->fails()){
+            return response()->json($validator->errors()->toJson(), 400);
+        }
+
+        $object = Playlist::find($request->id);
+        $object->playlistid  = $request->playlistid; 
+        $object->title  = $request->title;  
+        $object->category_id  = $request->category_id;  
+        $object->publishedat  = DateTime::createFromFormat('d/m/Y H:i:s', $request->publishedat)->format('Y-m-d H:i:s');  
+        $object->thumbnail  = $request->thumbnail;    
+        $object->nextpagetoken  = $request->nextpagetoken;
+
+        $object->update();
+
+        return response()->json([
+            'message' => 'Update category successful',
+            'data' => ['id'=>$object->id,'playlistid'=>$object->playlistid,'title'=>$object->title, 
+                'category_id'=>$object->category_id, 'publishedat' => $object->publishedat,
+                'thumbnail'=>$object->thumbnail, 'nextpagetoken' => $object->nextpagetoken]
+        ], 201);
+    }
+
+    /**
+     * @OA\DELETE(
+     *     path="/api/playlists/delete",
+     *     operationId="deletePlaylists",
+     *     tags={"Playlists"},
+     *     summary="Delete Playlist (api mới, cần check lại nghiệp vụ)",
+     *     description="Delete Playlist",
+     *     security={{"BearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="query",
+     *         description="id",
+     *         required=true,
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="code", type="string"),
+     *             @OA\Property(property="error", type="string")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized"
+     *     )
+     * )
+     */
+
+     public function deleteplaylists (Request $request) {        
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|exists:playlists,id'
+        ]);
+
+        if($validator->fails()){
+            return response()->json($validator->errors()->toJson(), 400);
+        }
+        if (Video::where('playlist_id', $request->id)->count() > 0) {
+            return [
+                'code' => "Cannot delete [Video]",
+                'error' => ""
+            ];
+        }
+    	$object = Playlist::find($request->id);
+        $object_name = $object->title;
+        $object->delete();
+        return [
+            'code' => "Xóa thành công " . $object_name,
+            'error' => ""
+        ];
     }
 }

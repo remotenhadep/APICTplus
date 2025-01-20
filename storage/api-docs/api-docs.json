@@ -1472,6 +1472,376 @@
                     }
                 ]
             }
+        },
+        "/api/playlists/list": {
+            "get": {
+                "tags": [
+                    "Playlists"
+                ],
+                "summary": "Playlists List",
+                "description": "Playlists List",
+                "operationId": "PlaylistsList",
+                "parameters": [
+                    {
+                        "name": "category_id",
+                        "in": "query",
+                        "description": "Category id",
+                        "required": false
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "code": {
+                                            "type": "string"
+                                        },
+                                        "error": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "list": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "string"
+                                                                },
+                                                                "playlistid": {
+                                                                    "type": "string"
+                                                                },
+                                                                "title": {
+                                                                    "type": "string"
+                                                                },
+                                                                "category_id": {
+                                                                    "type": "string"
+                                                                },
+                                                                "publishedat": {
+                                                                    "type": "string"
+                                                                },
+                                                                "thumbnail": {
+                                                                    "type": "string"
+                                                                },
+                                                                "nextpagetoken": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/playlists/create": {
+            "post": {
+                "tags": [
+                    "Playlists"
+                ],
+                "summary": "Create Playlist (api mới, cần check lại nghiệp vụ)",
+                "description": "Create Playlist",
+                "operationId": "createPlaylist",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "playlistid",
+                                    "title",
+                                    "category_id",
+                                    "publishedat",
+                                    "thumbnail",
+                                    "nextpagetoken"
+                                ],
+                                "properties": {
+                                    "playlistid": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "title": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "category_id": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "publishedat": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "thumbnail": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "nextpagetoken": {
+                                        "type": "string",
+                                        "format": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful create category",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "code": {
+                                            "type": "string"
+                                        },
+                                        "error": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "list": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "playlistid": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "title": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "category_id": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "publishedat": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "thumbnail": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "nextpagetoken": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/playlists/update": {
+            "post": {
+                "tags": [
+                    "Playlists"
+                ],
+                "summary": "Update Playlists (api mới, cần check lại nghiệp vụ)",
+                "description": "Update Playlists",
+                "operationId": "updatePlaylist",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "id",
+                                    "playlistid",
+                                    "title",
+                                    "category_id",
+                                    "publishedat",
+                                    "thumbnail",
+                                    "nextpagetoken"
+                                ],
+                                "properties": {
+                                    "id": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "playlistid": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "title": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "category_id": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "publishedat": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "thumbnail": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "nextpagetoken": {
+                                        "type": "string",
+                                        "format": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful update category",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "code": {
+                                            "type": "string"
+                                        },
+                                        "error": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "list": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "playlistid": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "title": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "category_id": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "publishedat": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "thumbnail": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "nextpagetoken": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/playlists/delete": {
+            "delete": {
+                "tags": [
+                    "Playlists"
+                ],
+                "summary": "Delete Playlist (api mới, cần check lại nghiệp vụ)",
+                "description": "Delete Playlist",
+                "operationId": "deletePlaylists",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": "id",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "code": {
+                                            "type": "string"
+                                        },
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
         }
     },
     "components": {
@@ -1499,6 +1869,10 @@
         {
             "name": "Categories",
             "description": "Categories"
+        },
+        {
+            "name": "Playlists",
+            "description": "Playlists"
         }
     ],
     "security": [
