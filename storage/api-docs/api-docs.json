@@ -1842,6 +1842,797 @@
                     }
                 ]
             }
+        },
+        "/api/videos/list": {
+            "get": {
+                "tags": [
+                    "Videos"
+                ],
+                "summary": "Video List",
+                "description": "Video List",
+                "operationId": "VideoList",
+                "parameters": [
+                    {
+                        "name": "category_id",
+                        "in": "query",
+                        "description": "Category id",
+                        "required": false
+                    },
+                    {
+                        "name": "video_id",
+                        "in": "query",
+                        "description": "Video id",
+                        "required": false
+                    },
+                    {
+                        "name": "keyword",
+                        "in": "query",
+                        "description": "keyword",
+                        "required": false
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Limit row selected",
+                        "required": false
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "code": {
+                                            "type": "string"
+                                        },
+                                        "error": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "list": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "user_id": {
+                                                                    "type": "string"
+                                                                },
+                                                                "aprove_userid": {
+                                                                    "type": "string"
+                                                                },
+                                                                "category_id": {
+                                                                    "type": "string"
+                                                                },
+                                                                "playlist_id": {
+                                                                    "type": "string"
+                                                                },
+                                                                "title": {
+                                                                    "type": "string"
+                                                                },
+                                                                "description": {
+                                                                    "type": "string"
+                                                                },
+                                                                "shortdescription": {
+                                                                    "type": "string"
+                                                                },
+                                                                "thumbnails": {
+                                                                    "type": "string"
+                                                                },
+                                                                "youtubeid": {
+                                                                    "type": "string"
+                                                                },
+                                                                "mp4_link": {
+                                                                    "type": "string"
+                                                                },
+                                                                "viewcount": {
+                                                                    "type": "string"
+                                                                },
+                                                                "likeCount": {
+                                                                    "type": "string"
+                                                                },
+                                                                "shareCount": {
+                                                                    "type": "string"
+                                                                },
+                                                                "commentCount": {
+                                                                    "type": "string"
+                                                                },
+                                                                "publishedAt": {
+                                                                    "type": "string"
+                                                                },
+                                                                "order": {
+                                                                    "type": "string"
+                                                                },
+                                                                "hot": {
+                                                                    "type": "string"
+                                                                },
+                                                                "plus": {
+                                                                    "type": "string"
+                                                                },
+                                                                "state": {
+                                                                    "type": "string"
+                                                                },
+                                                                "status": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/videos/relatelist": {
+            "get": {
+                "tags": [
+                    "Videos"
+                ],
+                "summary": "Video Relate List",
+                "description": "Video Relate List",
+                "operationId": "VideoRealteList",
+                "parameters": [
+                    {
+                        "name": "video_id",
+                        "in": "query",
+                        "description": "Video id",
+                        "required": false
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Limit row selected",
+                        "required": false
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "code": {
+                                            "type": "string"
+                                        },
+                                        "error": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "list": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "user_id": {
+                                                                    "type": "string"
+                                                                },
+                                                                "aprove_userid": {
+                                                                    "type": "string"
+                                                                },
+                                                                "category_id": {
+                                                                    "type": "string"
+                                                                },
+                                                                "playlist_id": {
+                                                                    "type": "string"
+                                                                },
+                                                                "title": {
+                                                                    "type": "string"
+                                                                },
+                                                                "description": {
+                                                                    "type": "string"
+                                                                },
+                                                                "shortdescription": {
+                                                                    "type": "string"
+                                                                },
+                                                                "thumbnails": {
+                                                                    "type": "string"
+                                                                },
+                                                                "youtubeid": {
+                                                                    "type": "string"
+                                                                },
+                                                                "mp4_link": {
+                                                                    "type": "string"
+                                                                },
+                                                                "viewcount": {
+                                                                    "type": "string"
+                                                                },
+                                                                "likeCount": {
+                                                                    "type": "string"
+                                                                },
+                                                                "shareCount": {
+                                                                    "type": "string"
+                                                                },
+                                                                "commentCount": {
+                                                                    "type": "string"
+                                                                },
+                                                                "publishedAt": {
+                                                                    "type": "string"
+                                                                },
+                                                                "order": {
+                                                                    "type": "string"
+                                                                },
+                                                                "hot": {
+                                                                    "type": "string"
+                                                                },
+                                                                "plus": {
+                                                                    "type": "string"
+                                                                },
+                                                                "state": {
+                                                                    "type": "string"
+                                                                },
+                                                                "status": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/videos/create": {
+            "post": {
+                "tags": [
+                    "Videos"
+                ],
+                "summary": "Create Video (api mới, cần check lại nghiệp vụ)",
+                "description": "Create Video",
+                "operationId": "createVideo",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "user_id",
+                                    "aprove_userid",
+                                    "category_id",
+                                    "playlist_id",
+                                    "title",
+                                    "description",
+                                    "shortdescription",
+                                    "thumbnails",
+                                    "youtubeid",
+                                    "mp4_link",
+                                    "publishedAt",
+                                    "state"
+                                ],
+                                "properties": {
+                                    "user_id": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "aprove_userid": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "category_id": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "playlist_id": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "title": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "shortdescription": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "thumbnails": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "youtubeid": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "mp4_link": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "viewcount": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "likeCount": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "shareCount": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "commentCount": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "publishedAt": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "order": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "hot": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "plus": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "state": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "format": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful create category",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "code": {
+                                            "type": "string"
+                                        },
+                                        "error": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "list": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "user_id": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "aprove_userid": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "category_id": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "playlist_id": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "title": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "description": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "shortdescription": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "thumbnails": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "youtubeid": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "mp4_link": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "viewcount": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "likeCount": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "shareCount": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "commentCount": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "publishedAt": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "order": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "hot": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "plus": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "state": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "status": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/videos/update": {
+            "post": {
+                "tags": [
+                    "Videos"
+                ],
+                "summary": "Update Video (api mới, cần check lại nghiệp vụ)",
+                "description": "Update Video",
+                "operationId": "updateVideo",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "id",
+                                    "user_id",
+                                    "aprove_userid",
+                                    "category_id",
+                                    "playlist_id",
+                                    "title",
+                                    "description",
+                                    "shortdescription",
+                                    "thumbnails",
+                                    "youtubeid",
+                                    "mp4_link",
+                                    "publishedAt",
+                                    "state"
+                                ],
+                                "properties": {
+                                    "id": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "user_id": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "aprove_userid": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "category_id": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "playlist_id": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "title": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "shortdescription": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "thumbnails": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "youtubeid": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "mp4_link": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "viewcount": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "likeCount": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "shareCount": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "commentCount": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "publishedAt": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "order": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "hot": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "plus": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "state": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "format": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful create category",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "code": {
+                                            "type": "string"
+                                        },
+                                        "error": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "list": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "user_id": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "aprove_userid": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "category_id": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "playlist_id": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "title": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "description": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "shortdescription": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "thumbnails": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "youtubeid": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "mp4_link": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "viewcount": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "likeCount": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "shareCount": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "commentCount": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "publishedAt": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "order": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "hot": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "plus": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "state": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                },
+                                                                "status": {
+                                                                    "type": "string",
+                                                                    "format": "string"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/videos/delete": {
+            "delete": {
+                "tags": [
+                    "Videos"
+                ],
+                "summary": "Delete Video (api mới, cần check lại nghiệp vụ)",
+                "description": "Delete Video",
+                "operationId": "deleteVideo",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": "id",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "code": {
+                                            "type": "string"
+                                        },
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
         }
     },
     "components": {
@@ -1873,6 +2664,10 @@
         {
             "name": "Playlists",
             "description": "Playlists"
+        },
+        {
+            "name": "Videos",
+            "description": "Videos"
         }
     ],
     "security": [

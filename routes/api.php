@@ -38,4 +38,12 @@ Route::group([
     Route::post("playlists/create", [ApiController::class, "createplaylists"]);
     Route::post("playlists/update", [ApiController::class, "updateplaylists"]);
     Route::delete("playlists/delete", [ApiController::class, "deleteplaylists"]);
+
+    // categories
+    Route::get("videos/list", [ApiController::class, "videolists"]);
+    Route::get("videos/relatelist", [ApiController::class, "videorelatelists"]);
+    
+    Route::post("videos/create", [ApiController::class, "createvideos"]);
+    Route::post("videos/update", [ApiController::class, "updatevideos"]);
+    Route::delete("videos/delete", [ApiController::class, "deletevideos"]);
 });

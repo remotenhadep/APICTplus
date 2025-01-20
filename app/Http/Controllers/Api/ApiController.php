@@ -1427,7 +1427,7 @@ class ApiController extends Controller
      * )
      */
 
-     public function deleteplaylists (Request $request) {        
+    public function deleteplaylists (Request $request) {        
         $validator = Validator::make($request->all(), [
             'id' => 'required|exists:playlists,id'
         ]);
@@ -1442,6 +1442,543 @@ class ApiController extends Controller
             ];
         }
     	$object = Playlist::find($request->id);
+        $object_name = $object->title;
+        $object->delete();
+        return [
+            'code' => "Xóa thành công " . $object_name,
+            'error' => ""
+        ];
+    }
+
+    /**
+     * @OA\GET(
+     *     path="/api/videos/list",
+     *     operationId="VideoList",
+     *     tags={"Videos"},
+     *     summary="Video List",
+     *     description="Video List",
+     *     security={{"BearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="category_id",
+     *         in="query",
+     *         description="Category id",
+     *         required=false,
+     *     ),
+     *     @OA\Parameter(
+     *         name="video_id",
+     *         in="query",
+     *         description="Video id",
+     *         required=false,
+     *     ),
+     *     @OA\Parameter(
+     *         name="keyword",
+     *         in="query",
+     *         description="keyword",
+     *         required=false,
+     *     ),
+     *     @OA\Parameter(
+     *         name="limit",
+     *         in="query",
+     *         description="Limit row selected",
+     *         required=false,
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="code", type="string"),
+     *             @OA\Property(property="error", type="string"),
+     *             @OA\Property(property="data", type="array", @OA\Items(
+     *                  @OA\Property(property="list", type="array", @OA\Items(
+     *                      @OA\Property(property="user_id", type="string"),
+     *                      @OA\Property(property="aprove_userid", type="string"),
+     *                      @OA\Property(property="category_id", type="string"),
+     *                      @OA\Property(property="playlist_id", type="string"),
+     *                      @OA\Property(property="title", type="string"),
+     *                      @OA\Property(property="description", type="string"),
+     *                      @OA\Property(property="shortdescription", type="string"),
+     *                      @OA\Property(property="thumbnails", type="string"),
+     *                      @OA\Property(property="youtubeid", type="string"),
+     *                      @OA\Property(property="mp4_link", type="string"),
+     *                      @OA\Property(property="viewcount", type="string"),
+     *                      @OA\Property(property="likeCount", type="string"),
+     *                      @OA\Property(property="shareCount", type="string"),
+     *                      @OA\Property(property="commentCount", type="string"),
+     *                      @OA\Property(property="publishedAt", type="string"),
+     *                      @OA\Property(property="order", type="string"),
+     *                      @OA\Property(property="hot", type="string"),
+     *                      @OA\Property(property="plus", type="string"),
+     *                      @OA\Property(property="state", type="string"),
+     *                      @OA\Property(property="status", type="string")
+     *                  ))
+     *              ))
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized"
+     *     )
+     * )
+     */
+    public function videolists(Request $request) {
+        $validator = Validator::make($request->all(), [
+            'video_id' => 'nullable|exists:videos,id',
+            'category_id' => 'nullable|exists:categories,id',
+            'limit' => 'nullable|numeric|min:0'
+        ]);
+
+        if($validator->fails()){
+            return response()->json($validator->errors()->toJson(), 400);
+        }
+
+        $object = Video::where('status', 1);
+        if ($request->category_id != '') {
+            $object = $object->where('category_id', $request->id);
+        } else {
+            $object = $object->where('hot', '1');
+        }
+
+        if ($request->video_id != '') {
+            $object = $object->where('id', $request->video_id);
+        }
+
+        if ($request->keyword != '') {
+            $object = $object->where('title', 'like', '%'. $request->keyword . '%');
+        }
+
+        if ($request->limit != '') {
+            $object = $object->limit($request->limit);
+        } else {
+            $object = $object->limit(5);
+        }
+
+        $object = $object->orderby('publishedAt','desc')->get();
+        $rs = array();
+        foreach ($object as $video) {
+            $category_title='';
+            if($video->category != null){
+                $category_title = $video->category->title;
+            }
+            $c = ['id' => $video->id, 'category_id' => $video->category_id, 'category_title' => $category_title,
+                'title' => $video->title, 'description' => $video->description, 'thumbnails' => $video->thumbnails, 
+                'youtubeid'=>$video->youtubeid, 'mp4_link' => $video->mp4_link, 'viewcount' => $video->viewcount, 
+                'likecount' => $video->likeCount, 'sharecount' => $video->shareCount, 'commentcount' => $video->commentCount, 
+                'publishedat' => $video->publishedAt];
+            array_push($rs, $c);
+        }
+        return [
+            'code' => "200",
+            'error'=>"",
+            'data'=>[
+                'list'=>$rs
+            ]
+        ];
+    }
+
+    /**
+     * @OA\GET(
+     *     path="/api/videos/relatelist",
+     *     operationId="VideoRealteList",
+     *     tags={"Videos"},
+     *     summary="Video Relate List",
+     *     description="Video Relate List",
+     *     security={{"BearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="video_id",
+     *         in="query",
+     *         description="Video id",
+     *         required=false,
+     *     ),
+     *     @OA\Parameter(
+     *         name="limit",
+     *         in="query",
+     *         description="Limit row selected",
+     *         required=false,
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="code", type="string"),
+     *             @OA\Property(property="error", type="string"),
+     *             @OA\Property(property="data", type="array", @OA\Items(
+     *                  @OA\Property(property="list", type="array", @OA\Items(
+     *                      @OA\Property(property="user_id", type="string"),
+     *                      @OA\Property(property="aprove_userid", type="string"),
+     *                      @OA\Property(property="category_id", type="string"),
+     *                      @OA\Property(property="playlist_id", type="string"),
+     *                      @OA\Property(property="title", type="string"),
+     *                      @OA\Property(property="description", type="string"),
+     *                      @OA\Property(property="shortdescription", type="string"),
+     *                      @OA\Property(property="thumbnails", type="string"),
+     *                      @OA\Property(property="youtubeid", type="string"),
+     *                      @OA\Property(property="mp4_link", type="string"),
+     *                      @OA\Property(property="viewcount", type="string"),
+     *                      @OA\Property(property="likeCount", type="string"),
+     *                      @OA\Property(property="shareCount", type="string"),
+     *                      @OA\Property(property="commentCount", type="string"),
+     *                      @OA\Property(property="publishedAt", type="string"),
+     *                      @OA\Property(property="order", type="string"),
+     *                      @OA\Property(property="hot", type="string"),
+     *                      @OA\Property(property="plus", type="string"),
+     *                      @OA\Property(property="state", type="string"),
+     *                      @OA\Property(property="status", type="string")
+     *                  ))
+     *              ))
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized"
+     *     )
+     * )
+     */
+    public function videorelatelists(Request $request) {
+        $validator = Validator::make($request->all(), [
+            'video_id' => 'required|exists:videos,id',
+            'limit' => 'nullable|numeric|min:0'
+        ]);
+
+        if($validator->fails()){
+            return response()->json($validator->errors()->toJson(), 400);
+        }
+
+        $video_object = Video::find($request->video_id);
+        $category_id = $video_object->category_id;
+        
+        $object = Video::where('category_id', $category_id)->where('status', 1)->inRandomOrder();
+
+        if ($request->limit != '') {
+            $object = $object->limit($request->limit);
+        } else {
+            $object = $object->limit(5);
+        }
+
+        $object = $object->orderby('publishedAt','desc')->get();
+        $rs = array();
+        foreach ($object as $video) {
+            $category_title='';
+            if($video->category != null){
+                $category_title = $video->category->title;
+            }
+            $c = ['id' => $video->id, 'category_id' => $video->category_id, 'category_title' => $category_title,
+                'title' => $video->title, 'description' => $video->description, 'thumbnails' => $video->thumbnails, 
+                'youtubeid'=>$video->youtubeid, 'mp4_link' => $video->mp4_link, 'viewcount' => $video->viewcount, 
+                'likecount' => $video->likeCount, 'sharecount' => $video->shareCount, 'commentcount' => $video->commentCount, 
+                'publishedat' => $video->publishedAt];
+            array_push($rs, $c);
+        }
+        return [
+            'code' => "200",
+            'error'=>"",
+            'data'=>[
+                'list'=>$rs
+            ]
+        ];
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/videos/create",
+     *     operationId="createVideo",
+     *     tags={"Videos"},
+     *     summary="Create Video (api mới, cần check lại nghiệp vụ)",
+     *     description="Create Video",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"user_id","aprove_userid", "category_id", "playlist_id", "title", "description",
+     *              "shortdescription", "thumbnails", "youtubeid", "mp4_link", "publishedAt", "state"},
+     *             @OA\Property(property="user_id", type="string", format="string"),
+     *             @OA\Property(property="aprove_userid", type="string", format="string"),
+     *             @OA\Property(property="category_id", type="string", format="string"),
+     *             @OA\Property(property="playlist_id", type="string", format="string"),
+     *             @OA\Property(property="title", type="string", format="string"),
+     *             @OA\Property(property="description", type="string", format="string"),
+     *             @OA\Property(property="shortdescription", type="string", format="string"),
+     *             @OA\Property(property="thumbnails", type="string", format="string"),
+     *             @OA\Property(property="youtubeid", type="string", format="string"),
+     *             @OA\Property(property="mp4_link", type="string", format="string"),
+     *             @OA\Property(property="viewcount", type="string", format="string"),
+     *             @OA\Property(property="likeCount", type="string", format="string"),
+     *             @OA\Property(property="shareCount", type="string", format="string"),
+     *             @OA\Property(property="commentCount", type="string", format="string"),
+     *             @OA\Property(property="publishedAt", type="string", format="string"),
+     *             @OA\Property(property="order", type="string", format="string"),
+     *             @OA\Property(property="hot", type="string", format="string"),
+     *             @OA\Property(property="plus", type="string", format="string"),
+     *             @OA\Property(property="state", type="string", format="string"),
+     *             @OA\Property(property="status", type="string", format="string")
+     *         ),
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful create category",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="code", type="string"),
+     *             @OA\Property(property="error", type="string"),
+     *             @OA\Property(property="data", type="array", @OA\Items(
+     *                  @OA\Property(property="list", type="array", @OA\Items(
+     *                      @OA\Property(property="id", type="string", format="string"),
+     *                      @OA\Property(property="user_id", type="string", format="string"),
+     *                      @OA\Property(property="aprove_userid", type="string", format="string"),
+     *                      @OA\Property(property="category_id", type="string", format="string"),
+     *                      @OA\Property(property="playlist_id", type="string", format="string"),
+     *                      @OA\Property(property="title", type="string", format="string"),
+     *                      @OA\Property(property="description", type="string", format="string"),
+     *                      @OA\Property(property="shortdescription", type="string", format="string"),
+     *                      @OA\Property(property="thumbnails", type="string", format="string"),
+     *                      @OA\Property(property="youtubeid", type="string", format="string"),
+     *                      @OA\Property(property="mp4_link", type="string", format="string"),
+     *                      @OA\Property(property="viewcount", type="string", format="string"),
+     *                      @OA\Property(property="likeCount", type="string", format="string"),
+     *                      @OA\Property(property="shareCount", type="string", format="string"),
+     *                      @OA\Property(property="commentCount", type="string", format="string"),
+     *                      @OA\Property(property="publishedAt", type="string", format="string"),
+     *                      @OA\Property(property="order", type="string", format="string"),
+     *                      @OA\Property(property="hot", type="string", format="string"),
+     *                      @OA\Property(property="plus", type="string", format="string"),
+     *                      @OA\Property(property="state", type="string", format="string"),
+     *                      @OA\Property(property="status", type="string", format="string")
+     *                  ))
+     *              ))
+     *         )
+     *     )
+     * )
+     */
+    public function createvideos (Request $request){
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required|exists:users,id',
+            'aprove_userid' => 'required|exists:users,id',
+            'category_id' => 'required|exists:categories,id',
+            'playlist_id' => 'required|exists:playlists,id',
+            'title' => 'required|max:255',
+            'description' => 'required',
+            'shortdescription' => 'required|max:255',
+            'thumbnails' => 'required|max:255',
+            'youtubeid' => 'required|max:255',
+            'mp4_link' => 'required|max:255',
+            'viewcount' => 'nullable|numeric|min:0',
+            'likeCount' => 'nullable|numeric|min:0',
+            'shareCount' => 'nullable|numeric|min:0',
+            'commentCount' => 'nullable|numeric|min:0',
+            'publishedAt' => 'required|date_format:d/m/Y H:i:s',
+            'order' => 'nullable|numeric|min:0',
+            'hot' => 'nullable|numeric|min:0',
+            'plus' => 'nullable|numeric|min:0',
+            'state' => 'required|numeric',
+            'status' => 'required|numeric'
+        ]);
+
+        if($validator->fails()){
+            return response()->json($validator->errors()->toJson(), 400);
+        }
+        
+        $param =  Array(
+            'user_id' => $request->user_id,
+            'aprove_userid' => $request->aprove_userid,
+            'category_id' => $request->category_id,
+            'playlist_id' => $request->playlist_id,
+            'title' => $request->title,
+            'description' => $request->description,
+            'shortdescription' => $request->shortdescription,
+            'thumbnails' => $request->thumbnails,
+            'youtubeid' => $request->youtubeid,
+            'mp4_link' => $request->mp4_link,
+            'viewcount' => $request->viewcount != '' ? $request->viewcount : 0,
+            'likeCount' => $request->likeCount != '' ? $request->likeCount : 0,
+            'shareCount' => $request->shareCount != '' ? $request->shareCount : 0,
+            'commentCount' => $request->commentCount != '' ? $request->commentCount : 0,
+            'publishedAt' => DateTime::createFromFormat('d/m/Y H:i:s', $request->publishedAt)->format('Y-m-d H:i:s'),
+            'order' => $request->order != '' ? $request->order : 100,
+            'hot' => $request->hot != '' ? $request->hot : 0,
+            'plus' => $request->plus != '' ? $request->plus : 0,
+            'state' => $request->state,
+            'status' => $request->status
+        );
+
+        $object = Video::create($param);            
+
+        return response()->json([
+            'message' => 'Create category successful',
+            'data' => ['id' => $object->id, 'category_id' => $object->category_id, 'category_title' => $category_title,
+                'title' => $object->title, 'description' => $object->description, 'thumbnails' => $object->thumbnails, 
+                'youtubeid'=>$object->youtubeid, 'mp4_link' => $object->mp4_link, 'viewcount' => $object->viewcount, 
+                'likecount' => $object->likeCount, 'sharecount' => $object->shareCount, 'commentcount' => $object->commentCount, 
+                'publishedat' => $object->publishedAt]
+        ], 201);
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/videos/update",
+     *     operationId="updateVideo",
+     *     tags={"Videos"},
+     *     summary="Update Video (api mới, cần check lại nghiệp vụ)",
+     *     description="Update Video",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"id", "user_id","aprove_userid", "category_id", "playlist_id", "title", "description",
+     *              "shortdescription", "thumbnails", "youtubeid", "mp4_link", "publishedAt", "state"},
+     *             @OA\Property(property="id", type="string", format="string"),
+     *             @OA\Property(property="user_id", type="string", format="string"),
+     *             @OA\Property(property="aprove_userid", type="string", format="string"),
+     *             @OA\Property(property="category_id", type="string", format="string"),
+     *             @OA\Property(property="playlist_id", type="string", format="string"),
+     *             @OA\Property(property="title", type="string", format="string"),
+     *             @OA\Property(property="description", type="string", format="string"),
+     *             @OA\Property(property="shortdescription", type="string", format="string"),
+     *             @OA\Property(property="thumbnails", type="string", format="string"),
+     *             @OA\Property(property="youtubeid", type="string", format="string"),
+     *             @OA\Property(property="mp4_link", type="string", format="string"),
+     *             @OA\Property(property="viewcount", type="string", format="string"),
+     *             @OA\Property(property="likeCount", type="string", format="string"),
+     *             @OA\Property(property="shareCount", type="string", format="string"),
+     *             @OA\Property(property="commentCount", type="string", format="string"),
+     *             @OA\Property(property="publishedAt", type="string", format="string"),
+     *             @OA\Property(property="order", type="string", format="string"),
+     *             @OA\Property(property="hot", type="string", format="string"),
+     *             @OA\Property(property="plus", type="string", format="string"),
+     *             @OA\Property(property="state", type="string", format="string"),
+     *             @OA\Property(property="status", type="string", format="string")
+     *         ),
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful create category",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="code", type="string"),
+     *             @OA\Property(property="error", type="string"),
+     *             @OA\Property(property="data", type="array", @OA\Items(
+     *                  @OA\Property(property="list", type="array", @OA\Items(
+     *                      @OA\Property(property="id", type="string", format="string"),
+     *                      @OA\Property(property="user_id", type="string", format="string"),
+     *                      @OA\Property(property="aprove_userid", type="string", format="string"),
+     *                      @OA\Property(property="category_id", type="string", format="string"),
+     *                      @OA\Property(property="playlist_id", type="string", format="string"),
+     *                      @OA\Property(property="title", type="string", format="string"),
+     *                      @OA\Property(property="description", type="string", format="string"),
+     *                      @OA\Property(property="shortdescription", type="string", format="string"),
+     *                      @OA\Property(property="thumbnails", type="string", format="string"),
+     *                      @OA\Property(property="youtubeid", type="string", format="string"),
+     *                      @OA\Property(property="mp4_link", type="string", format="string"),
+     *                      @OA\Property(property="viewcount", type="string", format="string"),
+     *                      @OA\Property(property="likeCount", type="string", format="string"),
+     *                      @OA\Property(property="shareCount", type="string", format="string"),
+     *                      @OA\Property(property="commentCount", type="string", format="string"),
+     *                      @OA\Property(property="publishedAt", type="string", format="string"),
+     *                      @OA\Property(property="order", type="string", format="string"),
+     *                      @OA\Property(property="hot", type="string", format="string"),
+     *                      @OA\Property(property="plus", type="string", format="string"),
+     *                      @OA\Property(property="state", type="string", format="string"),
+     *                      @OA\Property(property="status", type="string", format="string")
+     *                  ))
+     *              ))
+     *         )
+     *     )
+     * )
+     */
+    public function updatevideos (Request $request){
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|exists:videos,id',
+            'user_id' => 'required|exists:users,id',
+            'aprove_userid' => 'required|exists:users,id',
+            'category_id' => 'required|exists:categories,id',
+            'playlist_id' => 'required|exists:playlists,id',
+            'title' => 'required|max:255',
+            'description' => 'required',
+            'shortdescription' => 'required|max:255',
+            'thumbnails' => 'required|max:255',
+            'youtubeid' => 'required|max:255',
+            'mp4_link' => 'required|max:255',
+            'viewcount' => 'nullable|numeric|min:0',
+            'likeCount' => 'nullable|numeric|min:0',
+            'shareCount' => 'nullable|numeric|min:0',
+            'commentCount' => 'nullable|numeric|min:0',
+            'publishedAt' => 'required|date_format:d/m/Y H:i:s',
+            'order' => 'nullable|numeric|min:0',
+            'hot' => 'nullable|numeric|min:0',
+            'plus' => 'nullable|numeric|min:0',
+            'state' => 'required|numeric',
+            'status' => 'required|numeric'
+        ]);
+
+        if($validator->fails()){
+            return response()->json($validator->errors()->toJson(), 400);
+        }
+        $object = Video::find($request->id);
+        $object->user_id = $request->user_id;
+        $object->aprove_userid = $request->aprove_userid;
+        $object->category_id = $request->category_id;
+        $object->playlist_id = $request->playlist_id;
+        $object->title = $request->title;
+        $object->description = $request->description;
+        $objectshortdescription = $request->shortdescription;
+        $object->thumbnails = $request->thumbnails;
+        $object->youtubeid = $request->youtubeid;
+        $object->mp4_link = $request->mp4_link;
+        $object->viewcount = $request->viewcount != '' ? $request->viewcount : $object->viewcount;
+        $object->likeCount = $request->likeCount != '' ? $request->likeCount : $object->likeCount;
+        $object->shareCount = $request->shareCount != '' ? $request->shareCount : $object->shareCount;
+        $object->commentCount = $request->commentCount != '' ? $request->commentCount : $object->commentCount;
+        $object->publishedAt = DateTime::createFromFormat('d/m/Y H:i:s', $request->publishedAt)->format('Y-m-d H:i:s');
+        $object->order = $request->order != '' ? $request->order : $object->order;
+        $object->hot = $request->hot != '' ? $request->hot : $object->hot;
+        $object->plus = $request->plus != '' ? $request->plus : $object->plus;
+        $object->state = $request->state;
+        $object->status = $request->status;
+
+        $object = Video::update();            
+
+        return response()->json([
+            'message' => 'Create category successful',
+            'data' => ['id' => $object->id, 'category_id' => $object->category_id, 'category_title' => $category_title,
+                'title' => $object->title, 'description' => $object->description, 'thumbnails' => $object->thumbnails, 
+                'youtubeid'=>$object->youtubeid, 'mp4_link' => $object->mp4_link, 'viewcount' => $object->viewcount, 
+                'likecount' => $object->likeCount, 'sharecount' => $object->shareCount, 'commentcount' => $object->commentCount, 
+                'publishedat' => $object->publishedAt]
+        ], 201);
+    }
+
+    /**
+     * @OA\DELETE(
+     *     path="/api/videos/delete",
+     *     operationId="deleteVideo",
+     *     tags={"Videos"},
+     *     summary="Delete Video (api mới, cần check lại nghiệp vụ)",
+     *     description="Delete Video",
+     *     security={{"BearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="query",
+     *         description="id",
+     *         required=true,
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="code", type="string"),
+     *             @OA\Property(property="error", type="string")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized"
+     *     )
+     * )
+     */
+
+    public function deletevideos (Request $request) {        
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|exists:videos,id'
+        ]);
+
+        if($validator->fails()){
+            return response()->json($validator->errors()->toJson(), 400);
+        }
+    	$object = Video::find($request->id);
         $object_name = $object->title;
         $object->delete();
         return [
