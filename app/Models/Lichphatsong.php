@@ -17,6 +17,8 @@ class Lichphatsong extends Model
         'type',
         'timecode',
         'duration',
+        'creator_id',
+        'updater_id'
     ];
 
 }

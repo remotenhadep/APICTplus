@@ -62,7 +62,7 @@ class ApiController extends Controller
             'name' => 'required|string|between:2,100',
             'username' => 'required|string|between:2,100',
             'email' => 'required|string|max:100|email|unique:users',
-            'phone' => 'nullable|string|max:100|unique:users',
+            'phone' => 'required|string|max:100|unique:users',
             'password' => 'required|string',
         ]);
 
@@ -74,6 +74,8 @@ class ApiController extends Controller
             $validator->validated(),
             ['password' => bcrypt($request->password)]
         );
+
+        $user_param['status'] = 1;
 
         $user = User::create($user_param);
 
@@ -239,12 +241,13 @@ class ApiController extends Controller
             $validator->validated(),
             ['password' => bcrypt($request->password)]
         );
+        $user_param['status'] = 1;
 
         $user = User::create($user_param);
 
         return response()->json([
             'message' => 'User successfully created',
-            'user' => $user->only(['username', 'name', 'phone', 'email'])
+            'user' => $user->only(['id', 'username', 'name', 'phone', 'email'])
         ], 201);
     }
 
@@ -306,7 +309,7 @@ class ApiController extends Controller
 
         return response()->json([
             'message' => 'User successfully updated',
-            'user' => $user->only(['username', 'name', 'phone', 'email'])
+            'user' => $user->only(['id', 'username', 'name', 'phone', 'email'])
         ], 201);
     }
 
@@ -429,7 +432,7 @@ class ApiController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/live/tv/create",
+     *     path="/api/live/tv/create",
      *     operationId="createLiveTV",
      *     tags={"Others"},
      *     summary="Create Live TV (api mới, cần check lại nghiệp vụ)",
@@ -437,14 +440,15 @@ class ApiController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"ngay","time","title","youtubeid","url_mp4","duration"},
+     *             required={"ngay","time","title","youtubeid","url_mp4","duration","creator_id"},
      *             @OA\Property(property="ngay", type="string", format="string", example="17/01/2025"),
      *             @OA\Property(property="time", type="string", format="text", example="15:00"),
      *             @OA\Property(property="title", type="string", format="text"),
      *             @OA\Property(property="youtubeid", type="string", format="text"),
      *             @OA\Property(property="timecode", type="string", format="text", example="17/01/2025 15:00:24"),
      *             @OA\Property(property="url_mp4", type="string", format="text"),
-     *             @OA\Property(property="duration", type="string", format="text")
+     *             @OA\Property(property="duration", type="string", format="text"),
+     *             @OA\Property(property="creator_id", type="string", format="text")
      *         ),
      *     ),
      *     @OA\Response(
@@ -461,7 +465,8 @@ class ApiController extends Controller
      *                      @OA\Property(property="milisecon", type="string"),  
      *                      @OA\Property(property="timecode", type="string"),  
      *                      @OA\Property(property="youtubeid", type="string"),  
-     *                      @OA\Property(property="url_mp4", type="string")
+     *                      @OA\Property(property="url_mp4", type="string"),  
+     *                      @OA\Property(property="creator_id", type="string")
      *              ))
      *         )
      *     )
@@ -475,7 +480,8 @@ class ApiController extends Controller
             'youtubeid' => 'required',
             'url_mp4' => 'required',
             'timecode' => 'nullable|date_format:d/m/Y H:i:s',
-            'duration' => 'numeric|min:0|required'
+            'duration' => 'numeric|min:0|required',
+            'creator_id' => 'required|exists:users,id'
         ]);
 
         if($validator->fails()){
@@ -489,6 +495,7 @@ class ApiController extends Controller
         );
 
         $param['type'] = 0;
+        $param['creator_id'] = $request->creator_id;
 
         $object = LichPhatSong::create($param);
         
@@ -516,7 +523,7 @@ class ApiController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/live/tv/update",
+     *     path="/api/live/tv/update",
      *     operationId="updateLiveTV",
      *     tags={"Others"},
      *     summary="Update Live TV (api mới, cần check lại nghiệp vụ)",
@@ -524,7 +531,7 @@ class ApiController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"id","ngay","time","title","youtubeid","url_mp4","duration"},
+     *             required={"id","ngay","time","title","youtubeid","url_mp4","duration", "updater_id"},
      *             @OA\Property(property="id", type="string", format="text"),
      *             @OA\Property(property="ngay", type="string", format="text", example="17/01/2025"),
      *             @OA\Property(property="time", type="string", format="text"),
@@ -532,7 +539,8 @@ class ApiController extends Controller
      *             @OA\Property(property="youtubeid", type="string", format="text"),
      *             @OA\Property(property="url_mp4", type="string", format="text"),
      *             @OA\Property(property="timecode", type="string", format="text", example="17/01/2025 15:00:24"),
-     *             @OA\Property(property="duration", type="string", format="text")
+     *             @OA\Property(property="duration", type="string", format="text"),
+     *             @OA\Property(property="updater_id", type="string", format="text")
      *         ),
      *     ),
      *     @OA\Response(
@@ -549,7 +557,8 @@ class ApiController extends Controller
      *                      @OA\Property(property="milisecon", type="string"),  
      *                      @OA\Property(property="timecode", type="string"),  
      *                      @OA\Property(property="youtubeid", type="string"),  
-     *                      @OA\Property(property="url_mp4", type="string")
+     *                      @OA\Property(property="url_mp4", type="string"),  
+     *                      @OA\Property(property="updater_id", type="string")
      *              ))
      *         )
      *     )
@@ -564,7 +573,8 @@ class ApiController extends Controller
             'youtubeid' => 'required',
             'url_mp4' => 'required',
             'timecode' => 'nullable|date_format:d/m/Y H:i:s',
-            'duration' => 'numeric|min:0|required'
+            'duration' => 'numeric|min:0|required',
+            'updater_id' => 'required|exists:users,id'
         ]);
 
         if($validator->fails()){
@@ -579,6 +589,7 @@ class ApiController extends Controller
         $object->url_mp4 = $request->url_mp4;
         $object->timecode = $request->timecode != '' ? DateTime::createFromFormat('d/m/Y H:i:s', $request->timecode)->format('Y-m-d H:i:s') : null;
         $object->duration = $request->duration;
+        $object->updater_id = $request->updater_id;
 
         $object->update();
         
@@ -595,7 +606,8 @@ class ApiController extends Controller
         $duration = $object->duration * 1000;
         $result_data = ['id' => $object->id, 'time' => $object->time, 'title'=>$object->title, 
             'playliststart' => $timecode, 'duration' => $duration,'milisecon' => $milisecon, 
-            'timecode'=>$object->timecode, 'youtubeid'=>$object->youtubeid, 'url_mp4'=>$object->url_mp4];            
+            'timecode'=>$object->timecode, 'youtubeid'=>$object->youtubeid, 'url_mp4'=>$object->url_mp4, 
+            'creator_id' => $object->creator_id, 'updater_id' => $object->updater_id];            
 
         return response()->json([
             'message' => 'Update Live TV successful',
@@ -719,7 +731,7 @@ class ApiController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/live/radio/create",
+     *     path="/api/live/radio/create",
      *     operationId="createLiveRadio",
      *     tags={"Others"},
      *     summary="Create Live Radio (api mới, cần check lại nghiệp vụ)",
@@ -727,14 +739,15 @@ class ApiController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"ngay","time","title","youtubeid","url_mp4","duration"},
+     *             required={"ngay","time","title","youtubeid","url_mp4","duration","creator_id"},
      *             @OA\Property(property="ngay", type="string", format="string", example="17/01/2025"),
      *             @OA\Property(property="time", type="string", format="text", example="15:00"),
      *             @OA\Property(property="title", type="string", format="text"),
      *             @OA\Property(property="youtubeid", type="string", format="text"),
      *             @OA\Property(property="timecode", type="string", format="text", example="17/01/2025 15:00:24"),
      *             @OA\Property(property="url_mp4", type="string", format="text"),
-     *             @OA\Property(property="duration", type="string", format="text")
+     *             @OA\Property(property="duration", type="string", format="text"),
+     *             @OA\Property(property="creator_id", type="string", format="text")
      *         ),
      *     ),
      *     @OA\Response(
@@ -751,7 +764,8 @@ class ApiController extends Controller
      *                      @OA\Property(property="milisecon", type="string"),  
      *                      @OA\Property(property="timecode", type="string"),  
      *                      @OA\Property(property="youtubeid", type="string"),  
-     *                      @OA\Property(property="url_mp4", type="string")
+     *                      @OA\Property(property="url_mp4", type="string"),
+     *                      @OA\Property(property="creator_id", type="string"),
      *              ))
      *         )
      *     )
@@ -765,7 +779,8 @@ class ApiController extends Controller
             'youtubeid' => 'required',
             'url_mp4' => 'required',
             'timecode' => 'nullable|date_format:d/m/Y H:i:s',
-            'duration' => 'numeric|min:0|required'
+            'duration' => 'numeric|min:0|required',
+            'creator_id' => 'required|exists:users,id'
         ]);
 
         if($validator->fails()){
@@ -779,6 +794,7 @@ class ApiController extends Controller
         );
 
         $param['type'] = 1;
+        $param['creator_id'] = $request->creator_id;
 
         $object = LichPhatSong::create($param);
         
@@ -806,7 +822,7 @@ class ApiController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/live/radio/update",
+     *     path="/api/live/radio/update",
      *     operationId="updateLiveRadio",
      *     tags={"Others"},
      *     summary="Update Live Radio (api mới, cần check lại nghiệp vụ)",
@@ -814,7 +830,7 @@ class ApiController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"id","ngay","time","title","youtubeid","url_mp4","duration"},
+     *             required={"id","ngay","time","title","youtubeid","url_mp4","duration", "updater_id"},
      *             @OA\Property(property="id", type="string", format="text"),
      *             @OA\Property(property="ngay", type="string", format="text", example="17/01/2025"),
      *             @OA\Property(property="time", type="string", format="text"),
@@ -822,7 +838,8 @@ class ApiController extends Controller
      *             @OA\Property(property="youtubeid", type="string", format="text"),
      *             @OA\Property(property="url_mp4", type="string", format="text"),
      *             @OA\Property(property="timecode", type="string", format="text", example="17/01/2025 15:00:24"),
-     *             @OA\Property(property="duration", type="string", format="text")
+     *             @OA\Property(property="duration", type="string", format="text"),
+     *             @OA\Property(property="updater_id", type="string", format="text")
      *         ),
      *     ),
      *     @OA\Response(
@@ -854,7 +871,8 @@ class ApiController extends Controller
             'youtubeid' => 'required',
             'url_mp4' => 'required',
             'timecode' => 'nullable|date_format:d/m/Y H:i:s',
-            'duration' => 'numeric|min:0|required'
+            'duration' => 'numeric|min:0|required',
+            'updater_id' => 'required|exists:users,id'
         ]);
 
         if($validator->fails()){
@@ -869,6 +887,7 @@ class ApiController extends Controller
         $object->url_mp4 = $request->url_mp4;
         $object->timecode = $request->timecode != '' ? DateTime::createFromFormat('d/m/Y H:i:s', $request->timecode)->format('Y-m-d H:i:s') : null;
         $object->duration = $request->duration;
+        $object->updater_id = $request->updater_id;
 
         $object->update();
         
@@ -885,7 +904,8 @@ class ApiController extends Controller
         $duration = $object->duration * 1000;
         $result_data = ['id' => $object->id, 'time' => $object->time, 'title'=>$object->title, 
             'playliststart' => $timecode, 'duration' => $duration,'milisecon' => $milisecon, 
-            'timecode'=>$object->timecode, 'youtubeid'=>$object->youtubeid, 'url_mp4'=>$object->url_mp4];            
+            'timecode'=>$object->timecode, 'youtubeid'=>$object->youtubeid, 'url_mp4'=>$object->url_mp4,
+            'creator_id' => $object->creator_id, 'updater_id' => $object->updater_id];            
 
         return response()->json([
             'message' => 'Update Live TV successful',
@@ -1005,11 +1025,12 @@ class ApiController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"title","parentid"},
+     *             required={"title","parentid","creator_id"},
      *             @OA\Property(property="title", type="string", format="string"),
      *             @OA\Property(property="parentid", type="string", format="string"),
      *             @OA\Property(property="order", type="string", format="string"),
-     *             @OA\Property(property="status", type="string", format="string")
+     *             @OA\Property(property="status", type="string", format="string"),
+     *             @OA\Property(property="creator_id", type="string", format="string")
      *         ),
      *     ),
      *     @OA\Response(
@@ -1024,7 +1045,8 @@ class ApiController extends Controller
      *                      @OA\Property(property="parent_id", type="string"),
      *                      @OA\Property(property="title", type="string"),
      *                      @OA\Property(property="order", type="string"),     * 
-     *                      @OA\Property(property="status", type="string")
+     *                      @OA\Property(property="status", type="string"),     * 
+     *                      @OA\Property(property="creator_id", type="string")
      *                  ))
      *              ))
      *         )
@@ -1034,7 +1056,8 @@ class ApiController extends Controller
     public function createcategories (Request $request){
         $validator = Validator::make($request->all(), [
             'title' => 'required|max:255',
-            'parentid' => 'required'
+            'parentid' => 'required',
+            'creator_id' => 'required|exists:users,id'
         ]);
 
         if($validator->fails()){
@@ -1046,6 +1069,7 @@ class ApiController extends Controller
             'parentid' => $request->parentid,
             'order' => $request->order != '' ? $request->order : 100,
             'status' => $request->status != '' ? $request->status : 1,
+            'creator_id' => $request->creator_id
         );
 
         $object = Category::create($param);            
@@ -1053,7 +1077,7 @@ class ApiController extends Controller
         return response()->json([
             'message' => 'Create category successful',
             'data' => ['id'=>$object->id,'parent_id'=>$object->parentid,'title'=>$object->title, 
-                'order'=>$object->order, 'status' => $object->status]
+                'order'=>$object->order, 'status' => $object->status, 'creator_id' => $object->creator_id]
         ], 201);
     }
 
@@ -1067,12 +1091,13 @@ class ApiController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"id","title","parentid","order","status"},
+     *             required={"id","title","parentid","order","status", "creator_id"},
      *             @OA\Property(property="id", type="string", format="string"),
      *             @OA\Property(property="title", type="string", format="string"),
      *             @OA\Property(property="parentid", type="string", format="string"),
      *             @OA\Property(property="order", type="string", format="string"),
-     *             @OA\Property(property="status", type="string", format="string")
+     *             @OA\Property(property="status", type="string", format="string"),
+     *             @OA\Property(property="updater_id", type="string", format="string")
      *         ),
      *     ),
      *     @OA\Response(
@@ -1087,7 +1112,9 @@ class ApiController extends Controller
      *                      @OA\Property(property="parent_id", type="string"),
      *                      @OA\Property(property="title", type="string"),
      *                      @OA\Property(property="order", type="string"),
-     *                      @OA\Property(property="status", type="string")
+     *                      @OA\Property(property="status", type="string"),
+     *                      @OA\Property(property="creator_id", type="string"),
+     *                      @OA\Property(property="updater_id", type="string")
      *                  ))
      *              ))
      *         )
@@ -1101,6 +1128,7 @@ class ApiController extends Controller
             'parentid' => 'required',
             'order' => 'nullable|numeric|min:0',
             'status' => 'nullable|numeric|min:0|max:1',
+            'updater_id' => 'required|exists:users,id'
         ]);
 
         if($validator->fails()){
@@ -1116,13 +1144,14 @@ class ApiController extends Controller
         if ($request->status != '') {
             $object->status  = $request->status;
         }
+        $object->updater_id = $request->updater_id;
 
         $object->update();
 
         return response()->json([
             'message' => 'Update category successful',
             'data' => ['id'=>$object->id,'parent_id'=>$object->parentid,'title'=>$object->title, 
-                'order'=>$object->order, 'status' => $object->status]
+                'order'=>$object->order, 'status' => $object->status, 'creator_id' => $object->creator_id, 'updater_id' => $object->updater_id]
         ], 201);
     }
 
@@ -1233,7 +1262,7 @@ class ApiController extends Controller
         if ($request->category_id == '') {
             $data = Playlist::orderby('created_at', 'desc')->orderby('title', 'asc')->get();
         } else {
-            $data = Playlist::where('cateogry_id', $request->category_id)->orderby('created_at', 'desc')->orderby('title', 'asc')->get();
+            $data = Playlist::where('category_id', $request->category_id)->orderby('created_at', 'desc')->orderby('title', 'asc')->get();
         }
 
         $rs = array();
@@ -1317,7 +1346,7 @@ class ApiController extends Controller
         $object = Playlist::create($param);            
 
         return response()->json([
-            'message' => 'Create category successful',
+            'message' => 'Create playlist successful',
             'data' => ['id'=>$object->id,'playlistid'=>$object->playlistid,'title'=>$object->title, 
                 'category_id'=>$object->category_id, 'publishedat' => $object->publishedat,
                 'thumbnail'=>$object->thumbnail, 'nextpagetoken' => $object->nextpagetoken]
@@ -1391,7 +1420,7 @@ class ApiController extends Controller
         $object->update();
 
         return response()->json([
-            'message' => 'Update category successful',
+            'message' => 'Update playlist successful',
             'data' => ['id'=>$object->id,'playlistid'=>$object->playlistid,'title'=>$object->title, 
                 'category_id'=>$object->category_id, 'publishedat' => $object->publishedat,
                 'thumbnail'=>$object->thumbnail, 'nextpagetoken' => $object->nextpagetoken]
@@ -1533,7 +1562,7 @@ class ApiController extends Controller
 
         $object = Video::where('status', 1);
         if ($request->category_id != '') {
-            $object = $object->where('category_id', $request->id);
+            $object = $object->where('category_id', $request->category_id);
         } else {
             $object = $object->where('hot', '1');
         }
@@ -1799,6 +1828,10 @@ class ApiController extends Controller
 
         $object = Video::create($param);            
 
+        $category_title='';
+        if($object->category != null){
+            $category_title = $object->category->title;
+        }
         return response()->json([
             'message' => 'Create category successful',
             'data' => ['id' => $object->id, 'category_id' => $object->category_id, 'category_title' => $category_title,
@@ -1914,7 +1947,7 @@ class ApiController extends Controller
         $object->playlist_id = $request->playlist_id;
         $object->title = $request->title;
         $object->description = $request->description;
-        $objectshortdescription = $request->shortdescription;
+        $object->shortdescription = $request->shortdescription;
         $object->thumbnails = $request->thumbnails;
         $object->youtubeid = $request->youtubeid;
         $object->mp4_link = $request->mp4_link;
@@ -1929,10 +1962,13 @@ class ApiController extends Controller
         $object->state = $request->state;
         $object->status = $request->status;
 
-        $object = Video::update();            
-
+        $object->update();            
+        $category_title='';
+        if($object->category != null){
+            $category_title = $object->category->title;
+        }
         return response()->json([
-            'message' => 'Create category successful',
+            'message' => 'Update category successful',
             'data' => ['id' => $object->id, 'category_id' => $object->category_id, 'category_title' => $category_title,
                 'title' => $object->title, 'description' => $object->description, 'thumbnails' => $object->thumbnails, 
                 'youtubeid'=>$object->youtubeid, 'mp4_link' => $object->mp4_link, 'viewcount' => $object->viewcount, 

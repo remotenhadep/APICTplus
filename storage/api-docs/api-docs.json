@@ -545,7 +545,7 @@
                 ]
             }
         },
-        "/live/tv/create": {
+        "/api/live/tv/create": {
             "post": {
                 "tags": [
                     "Others"
@@ -564,7 +564,8 @@
                                     "title",
                                     "youtubeid",
                                     "url_mp4",
-                                    "duration"
+                                    "duration",
+                                    "creator_id"
                                 ],
                                 "properties": {
                                     "ngay": {
@@ -595,6 +596,10 @@
                                         "format": "text"
                                     },
                                     "duration": {
+                                        "type": "string",
+                                        "format": "text"
+                                    },
+                                    "creator_id": {
                                         "type": "string",
                                         "format": "text"
                                     }
@@ -644,6 +649,9 @@
                                                     },
                                                     "url_mp4": {
                                                         "type": "string"
+                                                    },
+                                                    "creator_id": {
+                                                        "type": "string"
                                                     }
                                                 },
                                                 "type": "object"
@@ -658,7 +666,7 @@
                 }
             }
         },
-        "/live/tv/update": {
+        "/api/live/tv/update": {
             "post": {
                 "tags": [
                     "Others"
@@ -678,7 +686,8 @@
                                     "title",
                                     "youtubeid",
                                     "url_mp4",
-                                    "duration"
+                                    "duration",
+                                    "updater_id"
                                 ],
                                 "properties": {
                                     "id": {
@@ -712,6 +721,10 @@
                                         "example": "17/01/2025 15:00:24"
                                     },
                                     "duration": {
+                                        "type": "string",
+                                        "format": "text"
+                                    },
+                                    "updater_id": {
                                         "type": "string",
                                         "format": "text"
                                     }
@@ -760,6 +773,9 @@
                                                         "type": "string"
                                                     },
                                                     "url_mp4": {
+                                                        "type": "string"
+                                                    },
+                                                    "updater_id": {
                                                         "type": "string"
                                                     }
                                                 },
@@ -884,7 +900,7 @@
                 ]
             }
         },
-        "/live/radio/create": {
+        "/api/live/radio/create": {
             "post": {
                 "tags": [
                     "Others"
@@ -903,7 +919,8 @@
                                     "title",
                                     "youtubeid",
                                     "url_mp4",
-                                    "duration"
+                                    "duration",
+                                    "creator_id"
                                 ],
                                 "properties": {
                                     "ngay": {
@@ -934,6 +951,10 @@
                                         "format": "text"
                                     },
                                     "duration": {
+                                        "type": "string",
+                                        "format": "text"
+                                    },
+                                    "creator_id": {
                                         "type": "string",
                                         "format": "text"
                                     }
@@ -983,6 +1004,9 @@
                                                     },
                                                     "url_mp4": {
                                                         "type": "string"
+                                                    },
+                                                    "creator_id": {
+                                                        "type": "string"
                                                     }
                                                 },
                                                 "type": "object"
@@ -997,7 +1021,7 @@
                 }
             }
         },
-        "/live/radio/update": {
+        "/api/live/radio/update": {
             "post": {
                 "tags": [
                     "Others"
@@ -1017,7 +1041,8 @@
                                     "title",
                                     "youtubeid",
                                     "url_mp4",
-                                    "duration"
+                                    "duration",
+                                    "updater_id"
                                 ],
                                 "properties": {
                                     "id": {
@@ -1051,6 +1076,10 @@
                                         "example": "17/01/2025 15:00:24"
                                     },
                                     "duration": {
+                                        "type": "string",
+                                        "format": "text"
+                                    },
+                                    "updater_id": {
                                         "type": "string",
                                         "format": "text"
                                     }
@@ -1249,7 +1278,8 @@
                             "schema": {
                                 "required": [
                                     "title",
-                                    "parentid"
+                                    "parentid",
+                                    "creator_id"
                                 ],
                                 "properties": {
                                     "title": {
@@ -1265,6 +1295,10 @@
                                         "format": "string"
                                     },
                                     "status": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "creator_id": {
                                         "type": "string",
                                         "format": "string"
                                     }
@@ -1309,6 +1343,9 @@
                                                                 },
                                                                 "status": {
                                                                     "type": "string"
+                                                                },
+                                                                "creator_id": {
+                                                                    "type": "string"
                                                                 }
                                                             },
                                                             "type": "object"
@@ -1345,7 +1382,8 @@
                                     "title",
                                     "parentid",
                                     "order",
-                                    "status"
+                                    "status",
+                                    "creator_id"
                                 ],
                                 "properties": {
                                     "id": {
@@ -1365,6 +1403,10 @@
                                         "format": "string"
                                     },
                                     "status": {
+                                        "type": "string",
+                                        "format": "string"
+                                    },
+                                    "updater_id": {
                                         "type": "string",
                                         "format": "string"
                                     }
@@ -1408,6 +1450,12 @@
                                                                     "type": "string"
                                                                 },
                                                                 "status": {
+                                                                    "type": "string"
+                                                                },
+                                                                "creator_id": {
+                                                                    "type": "string"
+                                                                },
+                                                                "updater_id": {
                                                                     "type": "string"
                                                                 }
                                                             },

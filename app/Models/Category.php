@@ -12,6 +12,8 @@ class Category extends Model
         'title',
         'parentid',
         'order',
-        'status'
+        'status',
+        'creator_id',
+        'updater_id'
     ];
 }
